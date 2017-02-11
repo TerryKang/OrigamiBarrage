@@ -1,5 +1,5 @@
 
-var self;
+//var self;
 BasicGame.Game = function (game) {
 
 	//	When a State is added to Phaser it automatically has the following properties set on it, even if they already exist:
@@ -32,6 +32,9 @@ BasicGame.Game = function (game) {
     this.olddistance;
     this.distancedelta;
     this.distance;
+    this.starfield;
+    this.bullets;
+    this.bulletTimer;
 };
 
 BasicGame.Game.prototype = {
@@ -40,69 +43,113 @@ BasicGame.Game.prototype = {
     bgGroup : this.bgGroup,
     viewRect : this.viewRect,
     boundsPoint : this.boundsPoint,
+    starfield : this.starfield,
+    bullets : this.bullets,
+    bulletTimer : this.bulletTimer,
 
 	create: function () {
 
 		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
-        this.add.sprite(this.game.width/2, this.game.height/2, 'star');
-        this.time.advancedTiming = true;
-/*
-        // create a reusable point for bounds checking later
-        this.boundsPoint = new Phaser.Point(0, 0);
-        // create our reusable view rectangle
-        this.viewRect = new Phaser.Rectangle(0, 0, this.game.width, this.game.height);
-        
-        // create a group for the clippable world objects
-        this.bgGroup = this.add.group();
-        
-        // create a crapload of squares in the world to show movement/zooming
-        var sqr, size;
-        for (var i = 0; i < 2500; i++) {
-            size = this.rnd.integerInRange(5, 20);
-            sqr = this.add.graphics(this.rnd.integerInRange(-1000, 1000), this.rnd.integerInRange(-1000, 1000), this.bgGroup);
-            sqr.beginFill(0x666666);
-            sqr.drawRect(size * -0.5, size * -0.5, size, size); // center the square on its position
-            sqr.endFill();
-        }
-        */
-        self = this;
+        //this.add.sprite(this.game.width/2, this.game.height/2, 'star');
+        //this.time.advancedTiming = true;
+
+        //self = this;
         // add a player sprite to give context to the movement
-        this.player = this.add.graphics(-15, -15);
-        this.player.beginFill(0x00ff00);
-        this.player.drawCircle(0, 0, 30);
-        this.player.endFill();
+        //this.player = this.add.graphics(-15, -15);
+        //this.player.beginFill(0x00ff00);
+        //this.player.drawCircle(0, 0, 30);
+        //this.player.endFill();
         
         // set our world size to be bigger than the window so we can move the camera
-        this.world.setBounds(-1000, -1000, 2000, 2000);
+        //this.world.setBounds(-1000, -1000, 2000, 2000);
         
         // move our camera half the size of the viewport back so the pivot point is in the center of our view
-        this.camera.x = (this.game.width * -0.5);
-        this.camera.y = (this.game.height * -0.5);
-/*
-        // create a hammer instance
-        var mc = new Hammer.Manager(document.body);
+        //this.camera.x = (this.game.width * -0.5);
+        //this.camera.y = (this.game.height * -0.5);
+        //this.game.input.maxPointers = 2;
 
-        // add the pinch recognizer
-        mc.add(new Hammer.Pinch({ threshold: 0 }));
+        // luxes.
+        starfield = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'starfield');
 
-        // listen to the events!
-        mc.on("pinch", function(ev) { console.log(ev.scale); });
-        mc.on("pinchin", this.zoomIn);
-        mc.on("pinchout", this.zoomOut);
+        player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'star');       
+        player.anchor.setTo(0.5, 0.5);
 
-        // listen to events...
-        mc.on("panleft panright tap press", function(ev) {
-            console.log(ev.type +" gesture detected.");
-        });*/
-        this.game.input.maxPointers = 2;
+        // bullets.
+        bullets = this.game.add.group();
+        bullets.enableBody = true;
+        bullets.physicsBodyType = Phaser.Physics.ARCADE;
+        bullets.createMultiple(100, 'bullet');
+        bullets.setAll('anchor.x', 0.5);
+        bullets.setAll('anchor.y', 1);
+        bullets.setAll('outOfBoundsKill', true);
+        bullets.setAll('checkWorldBounds', true);
+
+        bulletTimer = this.game.time.create(false);
+        bulletTimer.loop(100, this.bulletTimerUpdate, this);
+        bulletTimer.start();
+
 
 	},
+
+    bulletTimerUpdate: function () {
+        var bullet = bullets.getFirstExists(false);
+
+        if (bullet)
+        {
+            var bulletSpeed = this.game.rnd.integerInRange(100, 600);
+            var factor = this.game.rnd.frac();
+
+            var cx = this.game.width * 0.5;
+            var cy = this.game.height * 0.5;
+            var centerPoint = new Phaser.Point(cx, cy);
+            var bulletPoint = new Phaser.Point(0, 0);
+
+            var side = this.game.rnd.integerInRange(1, 4);
+            if (side == 1) // top
+            {
+                var posX = this.game.width * factor;
+
+                bullet.reset(posX, 0);
+
+                bulletPoint = new Phaser.Point(posX, 0);
+            }
+            else if (side == 2) // bottom
+            {
+                var posX = this.game.width * factor;
+
+                bullet.reset(posX, this.game.height);
+
+                bulletPoint = new Phaser.Point(posX, this.game.height);
+            }
+            else if (side == 3) // left
+            {
+                var posY = this.game.height * factor;
+
+                bullet.reset(0, posY);
+
+                bulletPoint = new Phaser.Point(0, posY);
+            }
+            else if (side == 4) // left
+            {
+                var posY = this.game.height * factor;
+
+                bullet.reset(this.game.width, posY);
+
+                bulletPoint = new Phaser.Point(this.game.width, posY);
+            }
+
+            var angle = this.game.math.radToDeg(Phaser.Point.angle(centerPoint, bulletPoint));
+            angle = angle;
+            bullet.angle = angle + 90;
+            console.log(angle);
+            game.physics.arcade.velocityFromAngle(bullet.angle - 90, bulletSpeed, bullet.body.velocity);
+        }
+    },
 
 	update: function () {
         console.log("update");
 		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
         if(this.input.pointer1.isDown && this.input.pointer2.isDown){
-            
             this.olddistance = this.distance;
             this.distance = Phaser.Math.distance(this.input.pointer1.x, this.input.pointer1.y, this.input.pointer2.x, this.input.pointer2.y);
             this.distancedelta = Math.abs(this.olddistance - this.distance);
@@ -113,12 +160,10 @@ BasicGame.Game.prototype = {
             else if (this.olddistance < this.distance && this.distancedelta > 4 ){  
                 this.zoomIn(); 
             }
-            //this.zoomOut(); 
-        }/*else if(this.input.pointer1.isDown){
-                this.zoomIn(); 
-        }*/
+        }
 
-
+        // luxes.
+        starfield.tilePosition.y += 2;
 	},
 
 	quitGame: function (pointer) {
@@ -139,25 +184,6 @@ BasicGame.Game.prototype = {
         // set our world scale as needed
         this.world.scale.set(this.worldScale);
         
-        // do some rudimentary bounds checking and clipping on each object
-        // TODO: improve with a quadtree or similar batched approach?
-        /*
-        this.bgGroup.forEachExists(function(circ) {
-            // our simplistic bounds checking; just see if the object's screen position is inside the view rectangle
-            // NOTE: this does not use getBounds() as this does not work when setting visible to false
-            self.boundsPoint.setTo(
-                ((circ.x - self.world.pivot.x) * self.world.scale.x) + (self.game.width * 0.5),
-                ((circ.y - self.world.pivot.y) * self.world.scale.y) + (self.game.height * 0.5)
-            );
-            if (Phaser.Rectangle.containsPoint(self.viewRect, self.boundsPoint)) {
-                //we can see this object, so show it
-                circ.visible = true;
-            }
-            else {
-                // we can't see this object, so hide it
-                circ.visible = false; 
-            }
-        });*/
     },
     zoomOut: function(){
         console.log("zoomOut");
@@ -167,25 +193,6 @@ BasicGame.Game.prototype = {
         
         // set our world scale as needed
         this.world.scale.set(this.worldScale);
-        /*
-        // do some rudimentary bounds checking and clipping on each object
-        // TODO: improve with a quadtree or similar batched approach?
-        this.bgGroup.forEachExists(function(circ) {
-            // our simplistic bounds checking; just see if the object's screen position is inside the view rectangle
-            // NOTE: this does not use getBounds() as this does not work when setting visible to false
-            self.boundsPoint.setTo(
-                ((circ.x - self.world.pivot.x) * self.world.scale.x) + (self.game.width * 0.5),
-                ((circ.y - self.world.pivot.y) * self.world.scale.y) + (self.game.height * 0.5)
-            );
-            if (Phaser.Rectangle.containsPoint(self.viewRect, self.boundsPoint)) {
-                //we can see this object, so show it
-                circ.visible = true;
-            }
-            else {
-                // we can't see this object, so hide it
-                circ.visible = false; 
-            }
-        });*/
     }
 
 };

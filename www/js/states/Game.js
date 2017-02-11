@@ -32,6 +32,9 @@ BasicGame.Game = function (game) {
     this.olddistance;
     this.distancedelta;
     this.distance;
+    this.starfield;
+    this.bullets;
+    this.bulletTimer;
 };
 
 BasicGame.Game.prototype = {
@@ -40,29 +43,108 @@ BasicGame.Game.prototype = {
     bgGroup : this.bgGroup,
     viewRect : this.viewRect,
     boundsPoint : this.boundsPoint,
+    starfield : this.starfield,
+    bullets : this.bullets,
+    bulletTimer : this.bulletTimer,
 
 	create: function () {
 
 		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
-        this.add.sprite(this.game.width/2, this.game.height/2, 'star');
-        this.time.advancedTiming = true;
+        //this.add.sprite(this.game.width/2, this.game.height/2, 'star');
+        //this.time.advancedTiming = true;
 
         //self = this;
         // add a player sprite to give context to the movement
-        this.player = this.add.graphics(-15, -15);
-        this.player.beginFill(0x00ff00);
-        this.player.drawCircle(0, 0, 30);
-        this.player.endFill();
+        //this.player = this.add.graphics(-15, -15);
+        //this.player.beginFill(0x00ff00);
+        //this.player.drawCircle(0, 0, 30);
+        //this.player.endFill();
         
         // set our world size to be bigger than the window so we can move the camera
-        this.world.setBounds(-1000, -1000, 2000, 2000);
+        //this.world.setBounds(-1000, -1000, 2000, 2000);
         
         // move our camera half the size of the viewport back so the pivot point is in the center of our view
-        this.camera.x = (this.game.width * -0.5);
-        this.camera.y = (this.game.height * -0.5);
-        this.game.input.maxPointers = 2;
+        //this.camera.x = (this.game.width * -0.5);
+        //this.camera.y = (this.game.height * -0.5);
+        //this.game.input.maxPointers = 2;
+
+        // luxes.
+        starfield = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'starfield');
+
+        player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'star');       
+        player.anchor.setTo(0.5, 0.5);
+
+        // bullets.
+        bullets = this.game.add.group();
+        bullets.enableBody = true;
+        bullets.physicsBodyType = Phaser.Physics.ARCADE;
+        bullets.createMultiple(100, 'bullet');
+        bullets.setAll('anchor.x', 0.5);
+        bullets.setAll('anchor.y', 1);
+        bullets.setAll('outOfBoundsKill', true);
+        bullets.setAll('checkWorldBounds', true);
+
+        bulletTimer = this.game.time.create(false);
+        bulletTimer.loop(100, this.bulletTimerUpdate, this);
+        bulletTimer.start();
+
 
 	},
+
+    bulletTimerUpdate: function () {
+        var bullet = bullets.getFirstExists(false);
+
+        if (bullet)
+        {
+            var bulletSpeed = this.game.rnd.integerInRange(100, 600);
+            var factor = this.game.rnd.frac();
+
+            var cx = this.game.width * 0.5;
+            var cy = this.game.height * 0.5;
+            var centerPoint = new Phaser.Point(cx, cy);
+            var bulletPoint = new Phaser.Point(0, 0);
+
+            var side = this.game.rnd.integerInRange(1, 4);
+            if (side == 1) // top
+            {
+                var posX = this.game.width * factor;
+
+                bullet.reset(posX, 0);
+
+                bulletPoint = new Phaser.Point(posX, 0);
+            }
+            else if (side == 2) // bottom
+            {
+                var posX = this.game.width * factor;
+
+                bullet.reset(posX, this.game.height);
+
+                bulletPoint = new Phaser.Point(posX, this.game.height);
+            }
+            else if (side == 3) // left
+            {
+                var posY = this.game.height * factor;
+
+                bullet.reset(0, posY);
+
+                bulletPoint = new Phaser.Point(0, posY);
+            }
+            else if (side == 4) // left
+            {
+                var posY = this.game.height * factor;
+
+                bullet.reset(this.game.width, posY);
+
+                bulletPoint = new Phaser.Point(this.game.width, posY);
+            }
+
+            var angle = this.game.math.radToDeg(Phaser.Point.angle(centerPoint, bulletPoint));
+            angle = angle;
+            bullet.angle = angle + 90;
+            console.log(angle);
+            game.physics.arcade.velocityFromAngle(bullet.angle - 90, bulletSpeed, bullet.body.velocity);
+        }
+    },
 
 	update: function () {
         console.log("update");
@@ -80,7 +162,8 @@ BasicGame.Game.prototype = {
             }
         }
 
-
+        // luxes.
+        starfield.tilePosition.y += 2;
 	},
 
 	quitGame: function (pointer) {

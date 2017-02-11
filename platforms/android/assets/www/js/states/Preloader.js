@@ -36,6 +36,9 @@ BasicGame.Preloader.prototype = {
     	this.load.image('star', 'assets/images/star.png');
     	this.load.spritesheet('dude', 'assets/images/dude.png', 32, 48);
 
+    	// luxes.
+    	this.load.image('bullet', 'assets/images/bullet.png');
+
 
 		// Audio track Attribution (menu sci-fi 1.ogg, CC 3.0)
 		// Alexandr-Zhelanov: https://soundcloud.com/alexandr-zhelanov 
