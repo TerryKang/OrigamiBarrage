@@ -31,6 +31,11 @@ BasicGame.Preloader.prototype = {
 		//	You can find all of these assets in the Phaser Examples repository
 
 		this.load.image('starfield', 'assets/images/starfield.png');
+		this.load.image('sky', 'assets/images/sky.png');
+		this.load.image('ground', 'assets/images/platform.png');
+    	this.load.image('star', 'assets/images/star.png');
+    	this.load.spritesheet('dude', 'assets/images/dude.png', 32, 48);
+
 
 		// Audio track Attribution (menu sci-fi 1.ogg, CC 3.0)
 		// Alexandr-Zhelanov: https://soundcloud.com/alexandr-zhelanov 

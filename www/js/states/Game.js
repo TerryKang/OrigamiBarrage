@@ -32,6 +32,7 @@ BasicGame.Game = function (game) {
     this.olddistance;
     this.distancedelta;
     this.distance;
+    this.starfield;
 };
 
 BasicGame.Game.prototype = {
@@ -40,27 +41,34 @@ BasicGame.Game.prototype = {
     bgGroup : this.bgGroup,
     viewRect : this.viewRect,
     boundsPoint : this.boundsPoint,
+    starfield : this.starfield,
 
 	create: function () {
 
 		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
-        this.add.sprite(this.game.width/2, this.game.height/2, 'star');
-        this.time.advancedTiming = true;
+        //this.add.sprite(this.game.width/2, this.game.height/2, 'star');
+        //this.time.advancedTiming = true;
 
         //self = this;
         // add a player sprite to give context to the movement
-        this.player = this.add.graphics(-15, -15);
-        this.player.beginFill(0x00ff00);
-        this.player.drawCircle(0, 0, 30);
-        this.player.endFill();
+        //this.player = this.add.graphics(-15, -15);
+        //this.player.beginFill(0x00ff00);
+        //this.player.drawCircle(0, 0, 30);
+        //this.player.endFill();
         
         // set our world size to be bigger than the window so we can move the camera
-        this.world.setBounds(-1000, -1000, 2000, 2000);
+        //this.world.setBounds(-1000, -1000, 2000, 2000);
         
         // move our camera half the size of the viewport back so the pivot point is in the center of our view
-        this.camera.x = (this.game.width * -0.5);
-        this.camera.y = (this.game.height * -0.5);
-        this.game.input.maxPointers = 2;
+        //this.camera.x = (this.game.width * -0.5);
+        //this.camera.y = (this.game.height * -0.5);
+        //this.game.input.maxPointers = 2;
+
+        // luxes.
+        starfield = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'starfield');
+
+        player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'star');       
+        player.anchor.setTo(0.5, 0.5);
 
 	},
 
@@ -80,7 +88,8 @@ BasicGame.Game.prototype = {
             }
         }
 
-
+        // luxes.
+        starfield.tilePosition.y += 2;
 	},
 
 	quitGame: function (pointer) {

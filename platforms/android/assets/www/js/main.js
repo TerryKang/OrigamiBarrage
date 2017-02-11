@@ -2,7 +2,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 //	100% of the browser window - see Boot.js for additional configuration
 var game = new Phaser.Game("100%", "100%", Phaser.AUTO);
 game.global = {
-    //Global Vars 
+    //Global Vars
 }
 
 //	Add the States your game has.
