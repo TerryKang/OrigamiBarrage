@@ -33,7 +33,8 @@ BasicGame.Game = function (game) {
     this.distancedelta;
     this.distance;
     this.starfield;
-    this.bullets;
+    this.frogs;
+    this.rabbits;
     this.bulletTimer;
 };
 
@@ -45,6 +46,8 @@ BasicGame.Game.prototype = {
     boundsPoint : this.boundsPoint,
     starfield : this.starfield,
     bullets : this.bullets,
+    frogs : this.frogs,
+    rabbits : this.rabbits,
     bulletTimer : this.bulletTimer,
 
 	create: function () {
@@ -69,30 +72,65 @@ BasicGame.Game.prototype = {
         //this.game.input.maxPointers = 2;
 
         // luxes.
-        starfield = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'starfield');
+        starfield = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'bg1');
 
-        player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'star');       
+        player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'flight');       
         player.anchor.setTo(0.5, 0.5);
+        player.scale.setTo(0.07, 0.07);
 
         // bullets.
-        bullets = this.game.add.group();
-        bullets.enableBody = true;
-        bullets.physicsBodyType = Phaser.Physics.ARCADE;
-        bullets.createMultiple(100, 'bullet');
-        bullets.setAll('anchor.x', 0.5);
-        bullets.setAll('anchor.y', 1);
-        bullets.setAll('outOfBoundsKill', true);
-        bullets.setAll('checkWorldBounds', true);
+        frogs = this.game.add.group();
+        //frogs.scale.set(0.01, 0.01);
+        frogs.enableBody = true;
+        frogs.physicsBodyType = Phaser.Physics.ARCADE;
+        frogs.createMultiple(100, 'frog');
+        frogs.setAll('anchor.x', 0.5);
+        frogs.setAll('anchor.y', 1);
+        frogs.setAll('scale.x', 0.10);
+        frogs.setAll('scale.y', 0.10);
+        frogs.setAll('outOfBoundsKill', true);
+        frogs.setAll('checkWorldBounds', true);
+
+        rabbits = this.game.add.group();
+        //rabbits.scale.set(0.01, 0.01);
+        rabbits.enableBody = true;
+        rabbits.physicsBodyType = Phaser.Physics.ARCADE;
+        rabbits.createMultiple(100, 'rabbit');
+        rabbits.setAll('anchor.x', 0.5);
+        rabbits.setAll('anchor.y', 1);
+        rabbits.setAll('scale.x', 0.10);
+        rabbits.setAll('scale.y', 0.10);
+        rabbits.setAll('outOfBoundsKill', true);
+        rabbits.setAll('checkWorldBounds', true);
+
+        cranes = this.game.add.group();
+        //rabbits.scale.set(0.01, 0.01);
+        cranes.enableBody = true;
+        cranes.physicsBodyType = Phaser.Physics.ARCADE;
+        cranes.createMultiple(100, 'crane');
+        cranes.setAll('anchor.x', 0.5);
+        cranes.setAll('anchor.y', 1);
+        cranes.setAll('scale.x', 0.10);
+        cranes.setAll('scale.y', 0.10);
+        cranes.setAll('outOfBoundsKill', true);
+        cranes.setAll('checkWorldBounds', true);
 
         bulletTimer = this.game.time.create(false);
-        bulletTimer.loop(100, this.bulletTimerUpdate, this);
+        bulletTimer.loop(1000, this.bulletTimerUpdate, this);
         bulletTimer.start();
 
 
 	},
 
     bulletTimerUpdate: function () {
-        var bullet = bullets.getFirstExists(false);
+        var bulletType = this.game.rnd.integerInRange(1, 3);
+        var bullet;
+        if (bulletType == 1)
+            bullet = frogs.getFirstExists(false);
+        else if (bulletType == 2)
+            bullet = rabbits.getFirstExists(false);
+        else if (bulletType == 3)
+            bullet = cranes.getFirstExists(false);
 
         if (bullet)
         {
@@ -163,7 +201,7 @@ BasicGame.Game.prototype = {
         }
 
         // luxes.
-        starfield.tilePosition.y += 2;
+        //starfield.tilePosition.y += 2;
 	},
 
 	quitGame: function (pointer) {
