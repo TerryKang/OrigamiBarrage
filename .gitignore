@@ -2,3 +2,4 @@
 platforms/
 platforms/*
 /platforms/*
+!/platforms
