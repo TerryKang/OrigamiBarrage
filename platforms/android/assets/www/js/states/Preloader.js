@@ -38,11 +38,20 @@ BasicGame.Preloader.prototype = {
 
     	// luxes.
     	this.load.image('flight', 'assets/images/flight_nomal_resize.png');
-    	this.load.image('frog', 'assets/images/flog_green_resize.png');
-    	this.load.image('rabbit', 'assets/images/rabbit_resize.png');
-    	this.load.image('crane', 'assets/images/Crane_resize.png');
+    	this.load.image('frog', 'assets/images/frog.png');
+    	this.load.image('pinwheel', 'assets/images/pinwheel.png');
+    	this.load.image('crane', 'assets/images/crane.png');
 
     	this.load.image('bg1', 'assets/images/bg1.jpeg');
+
+		this.load.image('floor1', 'assets/images/floor1.jpeg');
+		this.load.image('floor2', 'assets/images/floor2.jpeg');
+		this.load.image('floor3', 'assets/images/floor3.jpeg');
+
+		this.load.image('plane1', 'assets/images/plane1.png');
+    	this.load.image('plane2', 'assets/images/plane2.png');
+    	this.load.image('plane3', 'assets/images/plane3.png');
+
 
 
 		// Audio track Attribution (menu sci-fi 1.ogg, CC 3.0)

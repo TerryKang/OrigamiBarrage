@@ -26,30 +26,23 @@ BasicGame.Game = function (game) {
 
     this.worldScale = 1;
     this.player;
-    this.bgGroup;
-    this.viewRect;
-    this.boundsPoint;
     this.olddistance;
     this.distancedelta;
     this.distance;
     this.starfield;
     this.frogs;
-    this.rabbits;
+    this.pinwheels;
     this.bulletTimer;
+    this.layers = [];
+    this.isZooming;
+    this.isSwiping; 
+    this.startX;
+    this.startY;
+    this.endX;
+    this.endY;
 };
 
 BasicGame.Game.prototype = {
-    worldScale : this.worldScale,
-    player : this.player,
-    bgGroup : this.bgGroup,
-    viewRect : this.viewRect,
-    boundsPoint : this.boundsPoint,
-    starfield : this.starfield,
-    bullets : this.bullets,
-    frogs : this.frogs,
-    rabbits : this.rabbits,
-    bulletTimer : this.bulletTimer,
-
 	create: function () {
 
 		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
@@ -71,74 +64,103 @@ BasicGame.Game.prototype = {
         //this.camera.y = (this.game.height * -0.5);
         //this.game.input.maxPointers = 2;
 
-        // luxes.
-        starfield = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'bg1');
+        this.time.advancedTiming = true;
 
-        player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'flight');       
-        player.anchor.setTo(0.5, 0.5);
-        player.scale.setTo(0.07, 0.07);
+        this.floor = 3;
+        this.background = this.game.add.sprite(0, 0, "floor3");
+        this.background.x = 0;
+        this.background.y = 0;
+        this.background.height = this.game.height;
+        this.background.width = this.game.width;
+
+        this.game.input.maxPointers = 2;
+        this.isZooming = false;
+        this.isSwiping = false;
+
+
+        // luxes.
+        this.player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'plane3');       
+        this.player.anchor.setTo(0.5, 0.5);
+        this.player.scale.setTo(0.07, 0.07);
+
+        this.camera.follow(this.player);
+
 
         // bullets.
-        frogs = this.game.add.group();
+        this.frogs = this.game.add.group();
         //frogs.scale.set(0.01, 0.01);
-        frogs.enableBody = true;
-        frogs.physicsBodyType = Phaser.Physics.ARCADE;
-        frogs.createMultiple(100, 'frog');
-        frogs.setAll('anchor.x', 0.5);
-        frogs.setAll('anchor.y', 1);
-        frogs.setAll('scale.x', 0.10);
-        frogs.setAll('scale.y', 0.10);
-        frogs.setAll('outOfBoundsKill', true);
-        frogs.setAll('checkWorldBounds', true);
+        this.frogs.enableBody = true;
+        this.frogs.physicsBodyType = Phaser.Physics.ARCADE;
+        this.frogs.createMultiple(100, 'frog');
+        this.frogs.setAll('anchor.x', 0.5);
+        this.frogs.setAll('anchor.y', 1);
+        this.frogs.setAll('scale.x', 0.10);
+        this.frogs.setAll('scale.y', 0.10);
+        this.frogs.setAll('outOfBoundsKill', true);
+        this.frogs.setAll('checkWorldBounds', true);
 
-        rabbits = this.game.add.group();
-        //rabbits.scale.set(0.01, 0.01);
-        rabbits.enableBody = true;
-        rabbits.physicsBodyType = Phaser.Physics.ARCADE;
-        rabbits.createMultiple(100, 'rabbit');
-        rabbits.setAll('anchor.x', 0.5);
-        rabbits.setAll('anchor.y', 1);
-        rabbits.setAll('scale.x', 0.10);
-        rabbits.setAll('scale.y', 0.10);
-        rabbits.setAll('outOfBoundsKill', true);
-        rabbits.setAll('checkWorldBounds', true);
+        this.pinwheels = this.game.add.group();
+        //pinwheels.scale.set(0.01, 0.01);
+        this.pinwheels.enableBody = true;
+        this.pinwheels.physicsBodyType = Phaser.Physics.ARCADE;
+        this.pinwheels.createMultiple(100, 'pinwheel');
+        this.pinwheels.setAll('anchor.x', 0.5);
+        this.pinwheels.setAll('anchor.y', 1);
+        this.pinwheels.setAll('scale.x', 0.10);
+        this.pinwheels.setAll('scale.y', 0.10);
+        this.pinwheels.setAll('outOfBoundsKill', true);
+        this.pinwheels.setAll('checkWorldBounds', true);
 
-        cranes = this.game.add.group();
-        //rabbits.scale.set(0.01, 0.01);
-        cranes.enableBody = true;
-        cranes.physicsBodyType = Phaser.Physics.ARCADE;
-        cranes.createMultiple(100, 'crane');
-        cranes.setAll('anchor.x', 0.5);
-        cranes.setAll('anchor.y', 1);
-        cranes.setAll('scale.x', 0.10);
-        cranes.setAll('scale.y', 0.10);
-        cranes.setAll('outOfBoundsKill', true);
-        cranes.setAll('checkWorldBounds', true);
+        this.cranes = this.game.add.group();
+        //pinwheels.scale.set(0.01, 0.01);
+        this.cranes.enableBody = true;
+        this.cranes.physicsBodyType = Phaser.Physics.ARCADE;
+        this.cranes.createMultiple(100, 'crane');
+        this.cranes.setAll('anchor.x', 0.5);
+        this.cranes.setAll('anchor.y', 1);
+        this.cranes.setAll('scale.x', 0.10);
+        this.cranes.setAll('scale.y', 0.10);
+        this.cranes.setAll('outOfBoundsKill', true);
+        this.cranes.setAll('checkWorldBounds', true);
 
-        bulletTimer = this.game.time.create(false);
-        bulletTimer.loop(1000, this.bulletTimerUpdate, this);
-        bulletTimer.start();
+        this.bulletTimer = this.game.time.create(false);
+        this.bulletTimer.loop(1000, this.bulletTimerUpdate, this);
+        this.bulletTimer.start();
 
 
+        this.layers[0] =  this.game.add.group();
+        this.layers[1] =  this.game.add.group();
+        this.layers[2] =  this.game.add.group();
+
+        this.layers[0].add(this.frogs);
+        this.layers.z = 0;
+        this.layers[1].add(this.pinwheels);
+        this.layers.z = 1;
+        this.layers[2].add(this.cranes);
+        this.layers.z = 2;
+        this.layers[2].add(this.player);
+
+        this.layers[this.floor-1].add(this.player);
+        this.layers.sort('z', Phaser.Group.SORT_ASCENDING);
 	},
 
     bulletTimerUpdate: function () {
         var bulletType = this.game.rnd.integerInRange(1, 3);
         var bullet;
         if (bulletType == 1)
-            bullet = frogs.getFirstExists(false);
+            bullet = this.frogs.getFirstExists(false);
         else if (bulletType == 2)
-            bullet = rabbits.getFirstExists(false);
+            bullet = this.pinwheels.getFirstExists(false);
         else if (bulletType == 3)
-            bullet = cranes.getFirstExists(false);
+            bullet = this.cranes.getFirstExists(false);
 
         if (bullet)
         {
             var bulletSpeed = this.game.rnd.integerInRange(100, 600);
             var factor = this.game.rnd.frac();
 
-            var cx = this.game.width * 0.5;
-            var cy = this.game.height * 0.5;
+            var cx = this.world.centerX;
+            var cy = this.world.centerY;
             var centerPoint = new Phaser.Point(cx, cy);
             var bulletPoint = new Phaser.Point(0, 0);
 
@@ -180,24 +202,52 @@ BasicGame.Game.prototype = {
             angle = angle;
             bullet.angle = angle + 90;
             console.log(angle);
-            game.physics.arcade.velocityFromAngle(bullet.angle - 90, bulletSpeed, bullet.body.velocity);
+            this.game.physics.arcade.velocityFromAngle(bullet.angle - 90, bulletSpeed, bullet.body.velocity);
         }
     },
 
 	update: function () {
-        console.log("update");
 		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
         if(this.input.pointer1.isDown && this.input.pointer2.isDown){
             this.olddistance = this.distance;
             this.distance = Phaser.Math.distance(this.input.pointer1.x, this.input.pointer1.y, this.input.pointer2.x, this.input.pointer2.y);
             this.distancedelta = Math.abs(this.olddistance - this.distance);
-            console.log("distance delta : " + this.distancedelta);
-            if (this.olddistance > this.distance && this.distancedelta > 4 ){ 
+            if (!this.isZooming && this.olddistance > this.distance && this.distancedelta > 5 ){ 
                 this.zoomOut(); 
             }
-            else if (this.olddistance < this.distance && this.distancedelta > 4 ){  
+            else if (!this.isZooming && this.olddistance < this.distance && this.distancedelta > 5 ){  
                 this.zoomIn(); 
             }
+        }else if(!this.isSwiping && this.input.pointer1.isDown){
+            console.log("isDown");
+            this.isSwiping = true;
+            this.startX = this.input.pointer1.x;
+            this.startY = this.input.pointer1.y;
+        }else if(this.isSwiping && this.input.pointer1.isUp){
+            console.log("isUp");
+                this.endX = this.input.pointer1.x;
+		        this.endY = this.input.pointer1.y; 
+
+                // determining x and y distance travelled by mouse/finger from the start
+                // of the swipe until the end
+                var distX = this.startX-this.endX;
+                var distY = this.startY-this.endY;
+                console.log("distY : "+ distY);
+                console.log("distX : "+ distX);
+
+                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
+                // and the amount of vertical distance is at least 10 pixels
+                if(Math.abs(distY)>10){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distY>0){
+                            this.zoomOut();
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                            this.zoomIn();
+                    }
+                }	           
+                this.isSwiping = false;   
         }
 
         // luxes.
@@ -213,24 +263,85 @@ BasicGame.Game.prototype = {
 		this.state.start('MainMenu');
 
 	},
-    zoomIn: function(){
-        console.log("zoomIn");
-        this.worldScale += 0.05;
-        // set a minimum and maximum scale value
-        this.worldScale = Phaser.Math.clamp(this.worldScale, 0.25, 2);
-        
-        // set our world scale as needed
-        this.world.scale.set(this.worldScale);
-        
-    },
     zoomOut: function(){
         console.log("zoomOut");
+        if(this.floor == 3)
+            return;
+        this.isZooming = true;
         this.worldScale -= 0.05;
         // set a minimum and maximum scale value
-        this.worldScale = Phaser.Math.clamp(this.worldScale, 0.25, 2);
+        this.worldScale = Phaser.Math.clamp(this.worldScale, 1, 1.5);
+
+        if(this.worldScale<=1 && this.floor < 3){
+            this.layers[this.floor-1].remove(this.player);
+            this.floor++;
+            this.layers[this.floor-1].add(this.player);
+            this.changeMap();
+            if(this.floor == 3)
+                this.worldScale = 1;
+            else this.worldScale = 2;
+        }
+        this.scaleMap(this.worldScale);
         
         // set our world scale as needed
-        this.world.scale.set(this.worldScale);
+        this.isZooming = false;
+    },
+    zoomIn: function(){
+        console.log("zoomIn");
+        if(this.floor == 1)
+            return;
+        this.isZooming = true;
+        this.worldScale += 0.05;
+        // set a minimum and maximum scale value
+        this.worldScale = Phaser.Math.clamp(this.worldScale, 1, 1.5);
+        
+        if(this.worldScale>=1.5 && this.floor > 1){
+            this.layers[this.floor-1].remove(this.player);
+            this.floor--;
+            this.layers[this.floor-1].add(this.player);
+            this.changeMap();
+            this.worldScale = 1;
+        }
+
+        // set our world scale as needed
+        this.scaleMap(this.worldScale);
+        this.isZooming = false;
+    },
+    render: function(){
+            game.debug.cameraInfo(game.camera, 32, 32);
+    },
+    scaleMap: function(val){
+        this.background.height = this.game.height * val;
+        this.background.width = this.game.width * val;
+        this.world.bounds.width = this.game.width * val;
+        this.world.bounds.height = this.game.height * val;
+        //console.log(gmae.camera);
+
+        var changeX = this.world.centerX - this.player.x;
+        var changeY = this.world.centerY -this.player.y;
+
+        this.player.x = this.world.centerX;
+        this.player.y = this.world.centerY;
+        this.camera.bounds.height = this.game.height * val;
+        this.camera.bounds.width = this.game.width * val;
+
+        this.frogs.forEach(function(frog){
+            frog.x += changeX;
+            frog.y += changeY;
+        });
+        this.pinwheels.forEach(function(pinwheel){
+            pinwheel.x += changeX;
+            pinwheel.y += changeY;
+        });
+        this.cranes.forEach(function(crane){
+            crane.x += changeX;
+            crane.y += changeY;
+        });
+
+    },
+    changeMap: function(){
+        this.background.loadTexture('floor' + this.floor);
+        this.player.loadTexture('plane' + this.floor);
     }
 
 };
