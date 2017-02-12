@@ -204,7 +204,7 @@ BasicGame.Game.prototype = {
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        this.playerTrail = game.add.emitter(this.player.x, this.player.y + 10, 400);
+        /*this.playerTrail = game.add.emitter(this.player.x, this.player.y + 10, 400);
         this.playerTrail.width = 50;
         this.playerTrail.makeParticles('bullet');
         this.playerTrail.setXSpeed(30, -30);
@@ -212,7 +212,7 @@ BasicGame.Game.prototype = {
         this.playerTrail.setRotation(50,-50);
         this.playerTrail.setAlpha(1, 0.01, 800);
         this.playerTrail.setScale(0.05, 0.4, 0.05, 0.4, 2000, Phaser.Easing.Quintic.Out);
-        this.playerTrail.start(false, 5000, 10);
+        this.playerTrail.start(false, 5000, 10);*/
 
         //this.launchEnemy();
 	},
@@ -382,11 +382,11 @@ BasicGame.Game.prototype = {
         }
 
         // Note: The below code is prolly not neccessary.
-        this.bank = this.player.body.velocity.x / this.MAXSPEED;
+        /*this.bank = this.player.body.velocity.x / this.MAXSPEED;
         this.player.scale.x = 1 - Math.abs(this.bank) * 0.5;
         this.player.scale.x *= this.PLAYER_SCALE;
         this.player.angle = this.bank * 5;
-        this.playerTrail.x = this.player.x;
+        this.playerTrail.x = this.player.x;*/
 
         this.game.physics.arcade.overlap(this.player, this.frogs, this.shipCollide, null, this);
         this.game.physics.arcade.overlap(this.player, this.pinwheels, this.shipCollide, null, this);
