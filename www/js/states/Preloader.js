@@ -52,9 +52,9 @@ BasicGame.Preloader.prototype = {
 
     	this.load.image('bg1', 'assets/images/bg1.jpeg');
 
-		this.load.image('floor1', 'assets/images/skybg.png');
-		this.load.image('floor3', 'assets/images/floor2.jpeg');
-		this.load.image('floor2', 'assets/images/floor3.jpeg');
+		this.load.image('floor1', 'assets/images/bg1.png');
+		this.load.image('floor3', 'assets/images/bg2.png');
+		this.load.image('floor2', 'assets/images/bg2.png');
 
 		this.load.image('plane1', 'assets/images/plane1.png');
     	this.load.image('plane2', 'assets/images/plane2.png');
@@ -68,6 +68,7 @@ BasicGame.Preloader.prototype = {
 		this.load.audio('bgm', ['assets/audio/bgm.ogg', 'assets/audio/bgm.mp3']);
       	this.load.audio('levelchange', ['assets/audio/levelchange.ogg', 'assets/audio/levelchange.mp3']);
       	this.load.audio('papercrunch', ['assets/audio/papercrunch.ogg', 'assets/audio/papercrunch.mp3']);
+      	this.load.audio('explosion', ['assets/audio/explosion.ogg', 'assets/audio/explosion.mp3']);
 
 	},
 

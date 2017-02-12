@@ -71,6 +71,7 @@ BasicGame.Game = function (game) {
     this.music_fire;
     this.music_level;
     this.music_bg;
+    this.music_explode;
 };
 
 BasicGame.Game.prototype = {
@@ -81,8 +82,7 @@ BasicGame.Game.prototype = {
         this.music_bg.play();
         this.music_fire = this.add.audio('papercrunch');;
         this.music_level = this.add.audio('levelchange');
-
-
+        this.music_explode = this.add.audio('explosion');
 
         this.time.advancedTiming = true;
 
@@ -488,8 +488,11 @@ BasicGame.Game.prototype = {
         enemy.kill();
         bullet.kill();
 
+        this.music_explode.play();
+
         this.score += enemy.damageAmount * 10;
         this.displayScore();
+        
     },
 
     shipCollide: function (player, enemy) {
@@ -624,7 +627,7 @@ BasicGame.Game.prototype = {
         this.player.z = this.floor;
         this.mainLayer.sort('z', Phaser.Group.SORT_ASCENDING);
 
-        this.background.loadTexture('floor3');
+//        this.background.loadTexture('floor3');
 
         this.background.loadTexture('floor' + this.floor);
         this.player.loadTexture('plane' + this.floor);
