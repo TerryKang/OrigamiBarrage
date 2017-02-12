@@ -57,7 +57,7 @@ BasicGame.Game = function (game) {
     this.bullets;
     this.playerBulletTimer;
     this.BULLET_SPEED = 400;
-    this.BULLET_ELAPSE = 300;
+    this.BULLET_ELAPSE = 1000;
     this.PLAYER_BOUND = 40;
     this.MIN_ENEMY_SPACING = 300;
     this.MAX_ENEMY_SPACING = 3000;
@@ -70,6 +70,7 @@ BasicGame.Game = function (game) {
     this.shields;
     this.score = 0;
     this.scoreText;
+    this.gameOver;
 };
 
 BasicGame.Game.prototype = {
@@ -117,11 +118,10 @@ BasicGame.Game.prototype = {
         // luxes.
         this.player = this.add.sprite(this.world.centerX, this.game.height - 70, 'plane2');       
         this.player.anchor.setTo(0.5, 0.5);
-        his.player.scale.setTo(1, 0.75);
         this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
         this.player.body.maxVelocity.setTo(this.MAXSPEED, this.MAXSPEED);
         this.player.body.drag.setTo(this.DRAG, this.DRAG);
-        this.player.scale.setTo(this.PLAYER_SCALE, this.PLAYER_SCALE);
+        //this.player.scale.setTo(this.PLAYER_SCALE, this.PLAYER_SCALE);
         this.player.health = 100;
 
         // player's bullets.
@@ -138,7 +138,7 @@ BasicGame.Game.prototype = {
         this.explosions = game.add.group();
         this.explosions.enableBody = true;
         this.explosions.physicsBodyType = Phaser.Physics.ARCADE;
-        this.explosions.createMultiple(30, 'explosion');
+        this.explosions.createMultiple(100, 'explosion');
         this.explosions.setAll('anchor.x', 0.5);
         this.explosions.setAll('anchor.y', 0.5);
         this.explosions.forEach( function(explosion) {
@@ -255,6 +255,13 @@ BasicGame.Game.prototype = {
         this.scoreText = this.game.add.text(10, 10,
          'Score: ' + this.score, { font: '20px Arial', fill: '#fff' });
 
+        // Game over
+        this.gameOver = this.game.add.text(this.
+            game.world.centerX, this.game.world.centerY,
+             'GAME OVER!', { font: '84px Arial', fill: '#fff' });
+        this.gameOver.anchor.setTo(0.5, 0.5);
+        this.gameOver.visible = false;
+
         /*this.playerTrail = game.add.emitter(this.player.x, this.player.y + 10, 400);
         this.playerTrail.width = 50;
         this.playerTrail.makeParticles('bullet');
@@ -264,7 +271,9 @@ BasicGame.Game.prototype = {
         this.playerTrail.setAlpha(1, 0.01, 800);
         this.playerTrail.setScale(0.05, 0.4, 0.05, 0.4, 2000, Phaser.Easing.Quintic.Out);
         this.playerTrail.start(false, 5000, 10);*/
-        this.input.onDown.add(this.pressTab, this);
+        //this.input.onDown.add(this.pressTab, this);
+
+        this.cursors = this.game.input.keyboard.createCursorKeys();
 
 	},
 
@@ -603,6 +612,7 @@ BasicGame.Game.prototype = {
         this.player.angle = this.bank * 5;
         this.playerTrail.x = this.player.x;*/
 
+        // Check collisions.
         this.game.physics.arcade.overlap(this.player, this.frogs, this.shipCollide, null, this);
         this.game.physics.arcade.overlap(this.player, this.pinwheels, this.shipCollide, null, this);
         this.game.physics.arcade.overlap(this.player, this.cranes, this.shipCollide, null, this);
@@ -612,7 +622,41 @@ BasicGame.Game.prototype = {
         this.game.physics.arcade.overlap(this.pinwheels, this.bullets, this.hitEnemy, null, this);
         this.game.physics.arcade.overlap(this.cranes, this.bullets, this.hitEnemy, null, this);
         this.game.physics.arcade.overlap(this.butterfly, this.bullets, this.hitEnemy, null, this);
+
+        // Check game over.
+        if (!this.player.alive && this.gameOver.visible === false) {
+            this.gameOver.visible = true;
+            this.gameOver.alpha = 0;
+            var fadeInGameOver = this.game.add.tween(this.gameOver);
+            fadeInGameOver.to({alpha: 1}, 1000, Phaser.Easing.Quintic.Out);
+            fadeInGameOver.onComplete.add(setResetHandlers);
+            fadeInGameOver.start();
+            this.bulletTimer.stop();
+            function setResetHandlers() {
+                tapRestart = this.game.input.onTap.addOnce(_restart,this);
+                function _restart() {
+                  tapRestart.detach();
+                  restart();
+                }
+            }
+        }
 	},
+
+    restart: function () {
+        //  Reset the enemies
+        this.frogs.callAll('kill');
+        this.bulletTimer.start();
+
+        //  Revive the player
+        this.player.revive();
+        this.player.health = 100;
+        this.shields.render();
+        this.score = 0;
+        this.scoreText.render();
+
+        //  Hide the text
+        this.gameOver.visible = false;
+    },
 
     allStop: function () {
         this.frogs.forEach(function(element){
