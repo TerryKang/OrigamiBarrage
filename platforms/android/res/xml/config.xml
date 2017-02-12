@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.example.hello" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.example.origamibarrage" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <feature name="Whitelist">
         <param name="android-package" value="org.apache.cordova.whitelist.WhitelistPlugin" />
         <param name="onload" value="true" />
@@ -10,7 +10,7 @@
     <preference default="embedded" name="xwalkMode" />
     <preference default="true" name="xwalkMultipleApk" />
     <preference default="16" name="android-minSdkVersion" />
-    <name>HelloWorld</name>
+    <name>Origami Barrage</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
     </description>
