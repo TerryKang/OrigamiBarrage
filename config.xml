@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.example.hello" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>HelloWorld</name>
+<widget id="com.example.origamibarrage" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>OrigamiBarrage</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
     </description>
@@ -31,4 +31,22 @@
     <preference name="android-minSdkVersion" value="16" />
     <plugin name="cordova-plugin-crosswalk-webview" spec="~2.0.0" />
     <engine name="browser" spec="~4.1.0" />
+
+    
+    <platform name="android">
+        <!--
+            ldpi    : 36x36 px
+            mdpi    : 48x48 px
+            hdpi    : 72x72 px
+            xhdpi   : 96x96 px
+            xxhdpi  : 144x144 px
+            xxxhdpi : 192x192 px
+        -->
+        <icon src="res/icon36.png" density="ldpi" />
+        <icon src="res/icon48.png" density="mdpi" />
+        <icon src="res/icon72.png" density="hdpi" />
+        <icon src="res/icon96.png" density="xhdpi" />
+        <icon src="res/icon144.png" density="xxhdpi" />
+        <icon src="res/icon192.png" density="xxxhdpi" />
+    </platform>
 </widget>

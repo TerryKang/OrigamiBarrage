@@ -38,8 +38,6 @@ BasicGame.Game = function (game) {
     this.isZooming;
     this.isSwiping;
     this.swipe;
-    this.music;
-    this.levelSound;
     this.tabTimer;
     this.mainLayer;
     this.playerVelocity;
@@ -70,44 +68,27 @@ BasicGame.Game = function (game) {
     this.shields;
     this.score = 0;
     this.scoreText;
+    this.music_fire;
+    this.music_level;
+    this.music_bg;
 };
 
 BasicGame.Game.prototype = {
 	create: function () {
 
-		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
-        //this.add.sprite(this.game.width/2, this.game.height/2, 'star');
-        //this.time.advancedTiming = true;
-
-        //self = this;
-        // add a player sprite to give context to the movement
-        //this.player = this.add.graphics(-15, -15);
-        //this.player.beginFill(0x00ff00);
-        //this.player.drawCircle(0, 0, 30);
-        //this.player.endFill();
-        
-        // set our world size to be bigger than the window so we can move the camera
-        //this.world.setBounds(-1000, -1000, 2000, 2000);
-        
-        // move our camera half the size of the viewport back so the pivot point is in the center of our view
-        //this.camera.x = (this.game.width * -0.5);
-        //this.camera.y = (this.game.height * -0.5);
-        //this.game.input.maxPointers = 2;
-        this.levelSound = this.add.audio('levelchange');
-		this.music = this.add.audio('bgm');
-        this.music.loop = true;
-        this.music.play();
+		this.music_bg = this.add.audio('bgm');
+        this.music_bg.loop = true;
+        this.music_bg.play();
+        this.music_fire = this.add.audio('papercrunch');;
+        this.music_level = this.add.audio('levelchange');
 
 
-        this.swipe = new Swipe(this.game);
 
         this.time.advancedTiming = true;
 
-        this.background = this.game.add.sprite(0, 0, "floor3");
-        this.background.x = 0;
-        this.background.y = 0;
-        this.background.height = this.game.height;
-        this.background.width = this.game.width;
+	    this.background = game.add.tileSprite(0, 0, this.game.width, this.game.height, 'floor3');
+        this.background.tileScale.set(game.width/720,game.height/1028);
+
 
         this.game.input.maxPointers = 2;
         this.isZooming = false;
@@ -129,7 +110,7 @@ BasicGame.Game.prototype = {
         this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
         this.bullets.createMultiple(30, 'bullet');
         this.bullets.setAll('anchor.x', 0.5);
-        this.bullets.setAll('anchor.y', 1);
+        this.bullets.setAll('anchor.y', 0.5);
         this.bullets.setAll('outOfBoundsKill', true);
         this.bullets.setAll('checkWorldBounds', true);
 
@@ -257,15 +238,6 @@ BasicGame.Game.prototype = {
         this.scoreText = this.game.add.text(10, 10,
          'Score: ' + this.score, { font: '20px Arial', fill: '#fff' });
 
-        /*this.playerTrail = game.add.emitter(this.player.x, this.player.y + 10, 400);
-        this.playerTrail.width = 50;
-        this.playerTrail.makeParticles('bullet');
-        this.playerTrail.setXSpeed(30, -30);
-        this.playerTrail.setYSpeed(200, 180);
-        this.playerTrail.setRotation(50,-50);
-        this.playerTrail.setAlpha(1, 0.01, 800);
-        this.playerTrail.setScale(0.05, 0.4, 0.05, 0.4, 2000, Phaser.Easing.Quintic.Out);
-        this.playerTrail.start(false, 5000, 10);*/
         this.input.onDown.add(this.pressTab, this);
 
 	},
@@ -290,6 +262,7 @@ BasicGame.Game.prototype = {
             bullet.angle = this.player.angle;
             this.game.physics.arcade.velocityFromAngle(bullet.angle - 90, this.BULLET_SPEED, bullet.body.velocity);
             bullet.body.velocity.x += this.player.body.velocity.x;
+            this.music_fire.play();
         }
     },
 
@@ -316,12 +289,8 @@ BasicGame.Game.prototype = {
 
         if (bullet)
         {
-            //var bulletSpeed = this.game.rnd.integerInRange(100, 600);
             var factor = this.game.rnd.frac();
 
-            //var cx = this.world.centerX;
-            //var cy = this.world.centerY;
-            //var centerPoint = new Phaser.Point(cx, cy);
             var centerPoint = new Phaser.Point(this.player.x, this.player.y);
             var bulletPoint = new Phaser.Point(0, 0);
 
@@ -374,6 +343,7 @@ BasicGame.Game.prototype = {
 
         this.player.body.velocity.x = 0;
         this.player.body.velocity.y = 0;
+        this.background.tilePosition.y += 1;
 
         if(this.input.pointer1.isDown){
             if(!this.isSwiping ){
@@ -459,164 +429,7 @@ BasicGame.Game.prototype = {
             }
             this.isSwiping = false;   
         }
-        /*
-        var direction = this.swipe.check();
-        if (direction!==null) {
-        // direction= { x: x, y: y, direction: direction }
-            switch(direction.direction) {
-                case this.swipe.DIRECTION_LEFT: // do something
-                    this.player.body.velocity.x -= 300;
-                    break;
-                case this.swipe.DIRECTION_RIGHT:
-                    this.player.body.velocity.x += 300;
-                    break;
-                case this.swipe.DIRECTION_UP:
-                    this.player.body.velocity.y -= 300;
-                    break;
-                case this.swipe.DIRECTION_DOWN:
-                    this.player.body.velocity.y += 300;
-                    break;
-                case this.swipe.DIRECTION_UP_LEFT:
-                case this.swipe.DIRECTION_UP_RIGHT:
-                case this.swipe.DIRECTION_DOWN_LEFT:
-                case this.swipe.DIRECTION_DOWN_RIGHT:
-                    break;
-            }
-        }
-        */
-/*
-    //  only move when you click
-        if (this.input.pointer1.isDown){
-            this.physics.arcade.moveToXY(this.player, this.input.pointer1.x, this.input.pointer1.y, 700, 200);
-
-            if (Phaser.Rectangle.contains(this.player.body, this.input.x, this.input.y))
-            {
-                console.log("Phaser.Rectangle.contains()");
-                this.player.body.velocity.setTo(0, 0);
-            }
-        }else
-        {
-            this.player.body.velocity.setTo(0, 0);
-        }
-*/
-                /*
-		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
-        if(this.input.pointer1.isDown && this.input.pointer2.isDown){
-            this.olddistance = this.distance;
-            this.distance = Phaser.Math.distance(this.input.pointer1.x, this.input.pointer1.y, this.input.pointer2.x, this.input.pointer2.y);
-            this.distancedelta = Math.abs(this.olddistance - this.distance);
-            if (!this.isZooming && this.olddistance > this.distance && this.distancedelta > 5 ){ 
-                this.zoomOut(); 
-            }
-            else if (!this.isZooming && this.olddistance < this.distance && this.distancedelta > 5 ){  
-                this.zoomIn(); 
-            }
-        }else if(this.input.pointer1.isDown){
-            console.log("isDown");
-            if(!this.isSwiping ){
-                this.startX = this.input.pointer1.x;
-                this.startY = this.input.pointer1.y;
-            }else{
-                this.endX = this.input.pointer1.x;
-		        this.endY = this.input.pointer1.y; 
-
-                // determining x and y distance travelled by mouse/finger from the start
-                // of the swipe until the end
-                var distX = this.startX-this.endX;
-                var distY = this.startY-this.endY;
-                                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
-                // and the amount of vertical distance is at least 10 pixels
-                if(Math.abs(distY)>5){
-                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
-                    if(distY>0){
-                            this.zoomOut();
-                    }
-                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
-                    else{
-                            this.zoomIn();
-                    }
-                }	     
-            }
-            this.isSwiping = true;
-
-        }else if(this.input.pointer1.isUp){
-            console.log("isUp");
-            if(this.isSwiping){
-                this.endX = this.input.pointer1.x;
-		        this.endY = this.input.pointer1.y; 
-
-                // determining x and y distance travelled by mouse/finger from the start
-                // of the swipe until the end
-                var distX = this.startX-this.endX;
-                var distY = this.startY-this.endY;
-                console.log("distY : "+ distY);
-                console.log("distX : "+ distX);
-
-                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
-                // and the amount of vertical distance is at least 10 pixels
-                if(Math.abs(distY)>5){
-                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
-                    if(distY>0){
-                            this.zoomOut();
-                    }
-                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
-                    else{
-                            this.zoomIn();
-                    }
-                }	           
-            }
-            this.isSwiping = false;   
-        }
-*/
-        // luxes.
-        //starfield.tilePosition.y += 2;
-        //this.player.body.acceleration.x = 0;
-        /*
-        this.player.body.velocity.setTo(0, 0);
-        this.allStop();
-
-        if (this.cursors.left.isDown)
-        {
-            this.player.body.velocity.x = -200;
-            //this.player.body.acceleration.x = -this.ACCLERATION;
-            this.allStart();
-        }
-        else if (this.cursors.right.isDown)
-        {
-            this.player.body.velocity.x = 200;
-            //this.player.body.acceleration.x = this.ACCLERATION;
-            this.allStart();
-        }
-
-        if (this.player.x > this.game.width - this.PLAYER_BOUND) {
-            this.player.x = this.game.width - this.PLAYER_BOUND;
-            //this.player.body.acceleration.x = 0;
-            this.player.body.velocity.x = 0;
-        }
-        if (this.player.x < this.PLAYER_BOUND) {
-            this.player.x = this.PLAYER_BOUND;
-            //this.player.body.acceleration.x = 0;
-            this.player.body.velocity.x = 0;
-        }
-*/
-        // Note: The below code is prolly not neccessary.
-        /*this.bank = this.player.body.velocity.x / this.MAXSPEED;
-        this.player.scale.x = 1 - Math.abs(this.bank) * 0.5;
-        this.player.scale.x *= this.PLAYER_SCALE;
-        this.player.angle = this.bank * 5;
-        this.playerTrail.x = this.player.x;*/
-
-        /*
-        this.game.physics.arcade.overlap(this.player, this.frogs, this.shipCollide, null, this);
-        this.game.physics.arcade.overlap(this.player, this.pinwheels, this.shipCollide, null, this);
-        this.game.physics.arcade.overlap(this.player, this.cranes, this.shipCollide, null, this);
-        this.game.physics.arcade.overlap(this.player, this.butterfly, this.shipCollide, null, this);
-
-        this.game.physics.arcade.overlap(this.frogs, this.bullets, this.hitEnemy, null, this);
-        this.game.physics.arcade.overlap(this.pinwheels, this.bullets, this.hitEnemy, null, this);
-        this.game.physics.arcade.overlap(this.cranes, this.bullets, this.hitEnemy, null, this);
-        this.game.physics.arcade.overlap(this.butterfly, this.bullets, this.hitEnemy, null, this);
-        */
+  
 
         this.game.physics.arcade.overlap(this.layers[this.floor-1], this.bullets, this.hitEnemy, null, this);
         this.game.physics.arcade.overlap(this.player, this.layers[this.floor-1], this.shipCollide, null, this);
@@ -769,17 +582,19 @@ BasicGame.Game.prototype = {
             game.debug.cameraInfo(game.camera, 32, 32);
     },
     scaleMap: function(val){
+
+        var changeX = this.world.centerX;
+        var changeY = this.world.centerY;
+
         this.background.height = this.game.height * val;
         this.background.width = this.game.width * val;
         this.world.bounds.width = this.game.width * val;
         this.world.bounds.height = this.game.height * val;
         //console.log(gmae.camera);
 
-        var changeX = this.world.centerX - this.player.x;
-        var changeY = this.world.centerY -this.player.y;
+        changeX = this.world.centerX - changeX;
+        changeY = this.world.centerY - changeY;
 
-        this.player.x = this.world.centerX;
-        this.player.y = this.world.centerY;
         this.camera.bounds.height = this.game.height * val;
         this.camera.bounds.width = this.game.width * val;
 
@@ -795,6 +610,10 @@ BasicGame.Game.prototype = {
             crane.x += changeX;
             crane.y += changeY;
         });
+        this.butterfly.forEach(function(item){
+            item.x += changeX;
+            item.y += changeY;
+        });
 
     },
     changeMap: function(){
@@ -804,9 +623,12 @@ BasicGame.Game.prototype = {
         this.layers[this.floor-1].setAll('alpha', 1);
         this.player.z = this.floor;
         this.mainLayer.sort('z', Phaser.Group.SORT_ASCENDING);
+
+        this.background.loadTexture('floor3');
+
         this.background.loadTexture('floor' + this.floor);
         this.player.loadTexture('plane' + this.floor);
-        this.levelSound.play();
+        this.music_level.play();
     },
     endTabTimer: function() {
         this.tabTimer.destroy();

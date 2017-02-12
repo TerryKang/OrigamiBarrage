@@ -31,7 +31,6 @@ BasicGame.Preloader.prototype = {
 		//	You can find all of these assets in the Phaser Examples repository
 
 		this.load.image('starfield', 'assets/images/starfield.png');
-		this.load.image('sky', 'assets/images/sky.png');
 		this.load.image('ground', 'assets/images/platform.png');
     	this.load.image('star', 'assets/images/star.png');
     	this.load.spritesheet('dude', 'assets/images/dude.png', 32, 48);
@@ -48,9 +47,9 @@ BasicGame.Preloader.prototype = {
 
     	this.load.image('bg1', 'assets/images/bg1.jpeg');
 
-		this.load.image('floor1', 'assets/images/floor1.jpeg');
-		this.load.image('floor2', 'assets/images/floor2.jpeg');
-		this.load.image('floor3', 'assets/images/floor3.jpeg');
+		this.load.image('floor1', 'assets/images/skybg.png');
+		this.load.image('floor3', 'assets/images/floor2.jpeg');
+		this.load.image('floor2', 'assets/images/floor3.jpeg');
 
 		this.load.image('plane1', 'assets/images/plane1.png');
     	this.load.image('plane2', 'assets/images/plane2.png');
@@ -63,6 +62,7 @@ BasicGame.Preloader.prototype = {
 
 		this.load.audio('bgm', ['assets/audio/bgm.ogg', 'assets/audio/bgm.mp3']);
       	this.load.audio('levelchange', ['assets/audio/levelchange.ogg', 'assets/audio/levelchange.mp3']);
+      	this.load.audio('papercrunch', ['assets/audio/papercrunch.ogg', 'assets/audio/papercrunch.mp3']);
 
 	},
 
