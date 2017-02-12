@@ -36,7 +36,13 @@ BasicGame.Game = function (game) {
     this.bulletTimer;
     this.layers = [];
     this.isZooming;
-    this.isSwiping; 
+    this.isSwiping;
+    this.swipe;
+    this.music;
+    this.levelSound;
+    this.tabTimer;
+    this.mainLayer;
+    this.playerVelocity;
     this.startX;
     this.startY;
     this.endX;
@@ -84,10 +90,16 @@ BasicGame.Game.prototype = {
         //this.camera.x = (this.game.width * -0.5);
         //this.camera.y = (this.game.height * -0.5);
         //this.game.input.maxPointers = 2;
+        this.levelSound = this.add.audio('levelchange');
+		this.music = this.add.audio('bgm');
+        this.music.loop = true;
+        this.music.play();
+
+
+        this.swipe = new Swipe(this.game);
 
         this.time.advancedTiming = true;
 
-        this.floor = 3;
         this.background = this.game.add.sprite(0, 0, "floor3");
         this.background.x = 0;
         this.background.y = 0;
@@ -100,8 +112,9 @@ BasicGame.Game.prototype = {
 
 
         // luxes.
-        this.player = this.add.sprite(this.world.centerX, this.game.height - 70, 'plane3');       
+        this.player = this.add.sprite(this.world.centerX, this.game.height - 70, 'plane2');       
         this.player.anchor.setTo(0.5, 0.5);
+        his.player.scale.setTo(1, 0.75);
         this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
         this.player.body.maxVelocity.setTo(this.MAXSPEED, this.MAXSPEED);
         this.player.body.drag.setTo(this.DRAG, this.DRAG);
@@ -143,6 +156,8 @@ BasicGame.Game.prototype = {
         this.playerBulletTimer.start();
 
         this.camera.follow(this.player);
+        this.physics.enable(this.player, Phaser.Physics.ARCADE);
+        this.playerVelocity=400;
 
 
         // enemies.
@@ -187,36 +202,35 @@ BasicGame.Game.prototype = {
         this.bulletTimer.start();
 
 
+        this.tabTimer = this.time.create();
+     	this.tabTimer.add(200, this.endTabTimer,this);
+
         this.layers[0] =  this.game.add.group();
         this.layers[1] =  this.game.add.group();
-        this.layers[2] =  this.game.add.group();
 
+        this.layers[0].z = 0;
         this.layers[0].add(this.frogs);
-        this.layers.z = 0;
-        this.layers[1].add(this.pinwheels);
-        this.layers.z = 1;
-        this.layers[2].add(this.cranes);
-        this.layers.z = 2;
-        this.layers[2].add(this.player);
+        this.layers[0].add(this.pinwheels);
+        this.layers[1].z = 1;
+        this.layers[1].add(this.cranes);
+        this.layers[1].add(this.butterfly);
 
+
+
+        this.mainLayer = this.game.add.group();
+        this.mainLayer.add(this.layers[0]);
+        this.mainLayer.add(this.layers[1]);
+
+        this.floor = 2;
         this.layers[this.floor-1].add(this.player);
-        this.layers.sort('z', Phaser.Group.SORT_ASCENDING);
+        this.layers[0].setAll('alpha', 0.5);
+        this.layers[this.floor-1].setAll('alpha', 1);
+        this.mainLayer.sort('z', Phaser.Group.SORT_ASCENDING);
 
-        this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        /*this.playerTrail = game.add.emitter(this.player.x, this.player.y + 10, 400);
-        this.playerTrail.width = 50;
-        this.playerTrail.makeParticles('bullet');
-        this.playerTrail.setXSpeed(30, -30);
-        this.playerTrail.setYSpeed(200, 180);
-        this.playerTrail.setRotation(50,-50);
-        this.playerTrail.setAlpha(1, 0.01, 800);
-        this.playerTrail.setScale(0.05, 0.4, 0.05, 0.4, 2000, Phaser.Easing.Quintic.Out);
-        this.playerTrail.start(false, 5000, 10);*/
+        this.input.onDown.add(this.pressTab, this);
 
-        //this.launchEnemy();
 	},
-
     fireBullet: function () {
         var bullet = this.bullets.getFirstExists(false);
 
@@ -308,6 +322,135 @@ BasicGame.Game.prototype = {
     },
 
 	update: function () {
+
+        this.player.body.velocity.x = 0;
+        this.player.body.velocity.y = 0;
+
+        if(this.input.pointer1.isDown){
+            if(!this.isSwiping ){
+                this.startX = this.input.pointer1.x;
+                this.startY = this.input.pointer1.y;
+            }else{
+                this.endX = this.input.pointer1.x;
+		        this.endY = this.input.pointer1.y; 
+
+                // determining x and y distance travelled by mouse/finger from the start
+                // of the swipe until the end
+                var distX = this.startX-this.endX;
+                var distY = this.startY-this.endY;
+                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
+                // and the amount of vertical distance is at least 10 pixels
+                if(Math.abs(distX)>4){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distX>0){
+                        console.log("left");
+                        this.player.body.velocity.x -= this.playerVelocity;
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                        console.log("right");
+                        this.player.body.velocity.x += this.playerVelocity;
+                    }
+                    this.startX = this.input.pointer1.x;
+                    this.startY = this.input.pointer1.y;
+                }	    
+                if(Math.abs(distY)>4){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distY>0){
+                        this.player.body.velocity.y -= this.playerVelocity;
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                        this.player.body.velocity.y += this.playerVelocity;
+                    }
+                    this.startX = this.input.pointer1.x;
+                    this.startY = this.input.pointer1.y;
+                }	          
+            }
+            this.isSwiping = true;
+
+        }else if(this.input.pointer1.isUp){
+            if(this.isSwiping){
+                this.endX = this.input.pointer1.x;
+		        this.endY = this.input.pointer1.y; 
+
+                // determining x and y distance travelled by mouse/finger from the start
+                // of the swipe until the end
+                var distX = this.startX-this.endX;
+                var distY = this.startY-this.endY;
+
+                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
+                // and the amount of vertical distance is at least 10 pixels
+                if(Math.abs(distX)>4){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distX>0){
+                        console.log("left");
+                        this.player.body.velocity.x -= this.playerVelocity;
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                        console.log("right");
+                        this.player.body.velocity.x = this.playerVelocity;
+                    }
+                    this.startX = this.input.pointer1.x;
+                    this.startY = this.input.pointer1.y;
+                }	    
+                if(Math.abs(distY)>4){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distY>0){
+                        this.player.body.velocity.y -= this.playerVelocity;
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                        this.player.body.velocity.y += this.playerVelocity;
+                    }
+                    this.startX = this.input.pointer1.x;
+                    this.startY = this.input.pointer1.y;
+                }	           
+            }
+            this.isSwiping = false;   
+        }
+        /*
+        var direction = this.swipe.check();
+        if (direction!==null) {
+        // direction= { x: x, y: y, direction: direction }
+            switch(direction.direction) {
+                case this.swipe.DIRECTION_LEFT: // do something
+                    this.player.body.velocity.x -= 300;
+                    break;
+                case this.swipe.DIRECTION_RIGHT:
+                    this.player.body.velocity.x += 300;
+                    break;
+                case this.swipe.DIRECTION_UP:
+                    this.player.body.velocity.y -= 300;
+                    break;
+                case this.swipe.DIRECTION_DOWN:
+                    this.player.body.velocity.y += 300;
+                    break;
+                case this.swipe.DIRECTION_UP_LEFT:
+                case this.swipe.DIRECTION_UP_RIGHT:
+                case this.swipe.DIRECTION_DOWN_LEFT:
+                case this.swipe.DIRECTION_DOWN_RIGHT:
+                    break;
+            }
+        }
+        */
+/*
+    //  only move when you click
+        if (this.input.pointer1.isDown){
+            this.physics.arcade.moveToXY(this.player, this.input.pointer1.x, this.input.pointer1.y, 700, 200);
+
+            if (Phaser.Rectangle.contains(this.player.body, this.input.x, this.input.y))
+            {
+                console.log("Phaser.Rectangle.contains()");
+                this.player.body.velocity.setTo(0, 0);
+            }
+        }else
+        {
+            this.player.body.velocity.setTo(0, 0);
+        }
+*/
+                /*
 		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
         if(this.input.pointer1.isDown && this.input.pointer2.isDown){
             this.olddistance = this.distance;
@@ -319,13 +462,37 @@ BasicGame.Game.prototype = {
             else if (!this.isZooming && this.olddistance < this.distance && this.distancedelta > 5 ){  
                 this.zoomIn(); 
             }
-        }else if(!this.isSwiping && this.input.pointer1.isDown){
+        }else if(this.input.pointer1.isDown){
             console.log("isDown");
+            if(!this.isSwiping ){
+                this.startX = this.input.pointer1.x;
+                this.startY = this.input.pointer1.y;
+            }else{
+                this.endX = this.input.pointer1.x;
+		        this.endY = this.input.pointer1.y; 
+
+                // determining x and y distance travelled by mouse/finger from the start
+                // of the swipe until the end
+                var distX = this.startX-this.endX;
+                var distY = this.startY-this.endY;
+                                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
+                // and the amount of vertical distance is at least 10 pixels
+                if(Math.abs(distY)>5){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distY>0){
+                            this.zoomOut();
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                            this.zoomIn();
+                    }
+                }	     
+            }
             this.isSwiping = true;
-            this.startX = this.input.pointer1.x;
-            this.startY = this.input.pointer1.y;
-        }else if(this.isSwiping && this.input.pointer1.isUp){
+
+        }else if(this.input.pointer1.isUp){
             console.log("isUp");
+            if(this.isSwiping){
                 this.endX = this.input.pointer1.x;
 		        this.endY = this.input.pointer1.y; 
 
@@ -338,7 +505,7 @@ BasicGame.Game.prototype = {
 
                 // in order to have a vertical swipe, we need that y distance is at least twice the x distance
                 // and the amount of vertical distance is at least 10 pixels
-                if(Math.abs(distY)>10){
+                if(Math.abs(distY)>5){
                     // moving up, calling move function with horizontal and vertical tiles to move as arguments
                     if(distY>0){
                             this.zoomOut();
@@ -348,9 +515,10 @@ BasicGame.Game.prototype = {
                             this.zoomIn();
                     }
                 }	           
-                this.isSwiping = false;   
+            }
+            this.isSwiping = false;   
         }
-
+*/
         // luxes.
         //starfield.tilePosition.y += 2;
         //this.player.body.acceleration.x = 0;
@@ -479,7 +647,6 @@ BasicGame.Game.prototype = {
 
 	},
     zoomOut: function(){
-        console.log("zoomOut");
         if(this.floor == 3)
             return;
         this.isZooming = true;
@@ -510,7 +677,6 @@ BasicGame.Game.prototype = {
         this.isZooming = false;
     },
     zoomIn: function(){
-        console.log("zoomIn");
         if(this.floor == 1)
             return;
         this.isZooming = true;
@@ -571,8 +737,30 @@ BasicGame.Game.prototype = {
 
     },
     changeMap: function(){
+        this.layers[this.floor-1].remove(this.player);
+        this.layers[this.floor-1].setAll('alpha', 0.5);
+        this.floor = (this.floor==1) ? 2 : 1;
+        this.layers[this.floor-1].add(this.player);
+        this.layers[this.floor-1].setAll('alpha', 1);
         this.background.loadTexture('floor' + this.floor);
         this.player.loadTexture('plane' + this.floor);
+        this.levelSound.play();
+    },
+    endTabTimer: function() {
+        this.tabTimer.destroy();
+        this.tabTimer = this.time.create();
+     	this.tabTimer.add(200, this.endTabTimer,this);
+        console.log("stop");
+    },
+    pressTab: function(){
+        if(!this.tabTimer.running){
+            this.tabTimer.start();
+            console.log("start");
+        }
+        else{
+            this.endTabTimer();
+            this.changeMap();
+        }
     }
 
 };

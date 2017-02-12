@@ -36,6 +36,15 @@ BasicGame.Game = function (game) {
     this.bulletTimer;
     this.layers = [];
     this.isZooming;
+<<<<<<< HEAD
+    this.isSwiping;
+    this.swipe;
+    this.music;
+    this.levelSound;
+    this.tabTimer;
+    this.mainLayer;
+    this.playerVelocity;
+=======
     this.isSwiping; 
     this.startX;
     this.startY;
@@ -61,6 +70,7 @@ BasicGame.Game = function (game) {
     this.BUTTERFLY_SPEED = 300;
     this.PINWHEEL_SPEED = 400;
     this.CRANE_SPEED = 600;
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
 };
 
 BasicGame.Game.prototype = {
@@ -84,10 +94,16 @@ BasicGame.Game.prototype = {
         //this.camera.x = (this.game.width * -0.5);
         //this.camera.y = (this.game.height * -0.5);
         //this.game.input.maxPointers = 2;
+        this.levelSound = this.add.audio('levelchange');
+		this.music = this.add.audio('bgm');
+        this.music.loop = true;
+        this.music.play();
+
+
+        this.swipe = new Swipe(this.game);
 
         this.time.advancedTiming = true;
 
-        this.floor = 3;
         this.background = this.game.add.sprite(0, 0, "floor3");
         this.background.x = 0;
         this.background.y = 0;
@@ -100,6 +116,11 @@ BasicGame.Game.prototype = {
 
 
         // luxes.
+<<<<<<< HEAD
+        this.player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'plane2');       
+        this.player.anchor.setTo(0.5, 0.5);
+        this.player.scale.setTo(1, 0.75);
+=======
         this.player = this.add.sprite(this.world.centerX, this.game.height - 70, 'plane3');       
         this.player.anchor.setTo(0.5, 0.5);
         this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
@@ -142,7 +163,10 @@ BasicGame.Game.prototype = {
         this.playerBulletTimer.loop(this.BULLET_ELAPSE, this.fireBullet, this);
         this.playerBulletTimer.start();
 
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
         this.camera.follow(this.player);
+        this.physics.enable(this.player, Phaser.Physics.ARCADE);
+        this.playerVelocity=400;
 
 
         // enemies.
@@ -152,6 +176,11 @@ BasicGame.Game.prototype = {
         this.frogs.createMultiple(100, 'frog');
         this.frogs.setAll('anchor.x', 0.5);
         this.frogs.setAll('anchor.y', 0.5);
+<<<<<<< HEAD
+        //this.frogs.setAll('scale.x', 0.10);
+        //this.frogs.setAll('scale.y', 0.10);
+=======
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
         this.frogs.setAll('outOfBoundsKill', true);
         this.frogs.setAll('checkWorldBounds', true);
 
@@ -161,6 +190,11 @@ BasicGame.Game.prototype = {
         this.pinwheels.createMultiple(100, 'pinwheel');
         this.pinwheels.setAll('anchor.x', 0.5);
         this.pinwheels.setAll('anchor.y', 0.5);
+<<<<<<< HEAD
+        //this.pinwheels.setAll('scale.x', 0.10);
+        //this.pinwheels.setAll('scale.y', 0.10);
+=======
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
         this.pinwheels.setAll('outOfBoundsKill', true);
         this.pinwheels.setAll('checkWorldBounds', true);
 
@@ -170,36 +204,74 @@ BasicGame.Game.prototype = {
         this.cranes.createMultiple(100, 'crane');
         this.cranes.setAll('anchor.x', 0.5);
         this.cranes.setAll('anchor.y', 0.5);
+<<<<<<< HEAD
+        //this.cranes.setAll('scale.x', 0.10);
+        //this.cranes.setAll('scale.y', 0.10);
+=======
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
         this.cranes.setAll('outOfBoundsKill', true);
         this.cranes.setAll('checkWorldBounds', true);
 
         this.butterfly = this.game.add.group();
+<<<<<<< HEAD
+        //pinwheels.scale.set(0.01, 0.01);
+=======
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
         this.butterfly.enableBody = true;
         this.butterfly.physicsBodyType = Phaser.Physics.ARCADE;
         this.butterfly.createMultiple(100, 'butterfly');
         this.butterfly.setAll('anchor.x', 0.5);
         this.butterfly.setAll('anchor.y', 0.5);
+<<<<<<< HEAD
+        //this.cranes.setAll('scale.x', 0.10);
+        //this.cranes.setAll('scale.y', 0.10);
         this.butterfly.setAll('outOfBoundsKill', true);
         this.butterfly.setAll('checkWorldBounds', true);
 
+
+=======
+        this.butterfly.setAll('outOfBoundsKill', true);
+        this.butterfly.setAll('checkWorldBounds', true);
+
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
         this.bulletTimer = this.game.time.create(false);
         this.bulletTimer.loop(1000, this.launchEnemy, this);
         this.bulletTimer.start();
 
 
+        this.tabTimer = this.time.create();
+     	this.tabTimer.add(200, this.endTabTimer,this);
+
         this.layers[0] =  this.game.add.group();
         this.layers[1] =  this.game.add.group();
-        this.layers[2] =  this.game.add.group();
 
+        this.layers[0].z = 0;
         this.layers[0].add(this.frogs);
-        this.layers.z = 0;
-        this.layers[1].add(this.pinwheels);
-        this.layers.z = 1;
-        this.layers[2].add(this.cranes);
-        this.layers.z = 2;
-        this.layers[2].add(this.player);
+        this.layers[0].add(this.pinwheels);
+        this.layers[1].z = 1;
+        this.layers[1].add(this.cranes);
+        this.layers[1].add(this.butterfly);
 
+
+
+        this.mainLayer = this.game.add.group();
+        this.mainLayer.add(this.layers[0]);
+        this.mainLayer.add(this.layers[1]);
+
+        this.floor = 2;
         this.layers[this.floor-1].add(this.player);
+<<<<<<< HEAD
+        this.layers[0].setAll('alpha', 0.5);
+        this.layers[this.floor-1].setAll('alpha', 1);
+        this.mainLayer.sort('z', Phaser.Group.SORT_ASCENDING);
+
+
+        this.input.onDown.add(this.pressTab, this);
+
+	},
+
+    bulletTimerUpdate: function () {
+=======
         this.layers.sort('z', Phaser.Group.SORT_ASCENDING);
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
@@ -231,6 +303,7 @@ BasicGame.Game.prototype = {
     },
 
     launchEnemy: function () {
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
         var bulletType = this.game.rnd.integerInRange(1, 4);
         var bullet;
         var bulletSpeed;
@@ -244,12 +317,17 @@ BasicGame.Game.prototype = {
         }
         else if (bulletType == 3) {
             bullet = this.cranes.getFirstExists(false);
+<<<<<<< HEAD
+        else if (bulletType == 4)
+            bullet = this.butterfly.getFirstExists(false);
+=======
             bulletSpeed = this.CRANE_SPEED;
         }
         else if (bulletType == 4) {
             bullet = this.butterfly.getFirstExists(false);
             bulletSpeed = this.BUTTERFLY_SPEED;
         }
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
 
         if (bullet)
         {
@@ -308,6 +386,135 @@ BasicGame.Game.prototype = {
     },
 
 	update: function () {
+
+        this.player.body.velocity.x = 0;
+        this.player.body.velocity.y = 0;
+
+        if(this.input.pointer1.isDown){
+            if(!this.isSwiping ){
+                this.startX = this.input.pointer1.x;
+                this.startY = this.input.pointer1.y;
+            }else{
+                this.endX = this.input.pointer1.x;
+		        this.endY = this.input.pointer1.y; 
+
+                // determining x and y distance travelled by mouse/finger from the start
+                // of the swipe until the end
+                var distX = this.startX-this.endX;
+                var distY = this.startY-this.endY;
+                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
+                // and the amount of vertical distance is at least 10 pixels
+                if(Math.abs(distX)>4){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distX>0){
+                        console.log("left");
+                        this.player.body.velocity.x -= this.playerVelocity;
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                        console.log("right");
+                        this.player.body.velocity.x += this.playerVelocity;
+                    }
+                    this.startX = this.input.pointer1.x;
+                    this.startY = this.input.pointer1.y;
+                }	    
+                if(Math.abs(distY)>4){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distY>0){
+                        this.player.body.velocity.y -= this.playerVelocity;
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                        this.player.body.velocity.y += this.playerVelocity;
+                    }
+                    this.startX = this.input.pointer1.x;
+                    this.startY = this.input.pointer1.y;
+                }	          
+            }
+            this.isSwiping = true;
+
+        }else if(this.input.pointer1.isUp){
+            if(this.isSwiping){
+                this.endX = this.input.pointer1.x;
+		        this.endY = this.input.pointer1.y; 
+
+                // determining x and y distance travelled by mouse/finger from the start
+                // of the swipe until the end
+                var distX = this.startX-this.endX;
+                var distY = this.startY-this.endY;
+
+                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
+                // and the amount of vertical distance is at least 10 pixels
+                if(Math.abs(distX)>4){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distX>0){
+                        console.log("left");
+                        this.player.body.velocity.x -= this.playerVelocity;
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                        console.log("right");
+                        this.player.body.velocity.x = this.playerVelocity;
+                    }
+                    this.startX = this.input.pointer1.x;
+                    this.startY = this.input.pointer1.y;
+                }	    
+                if(Math.abs(distY)>4){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distY>0){
+                        this.player.body.velocity.y -= this.playerVelocity;
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                        this.player.body.velocity.y += this.playerVelocity;
+                    }
+                    this.startX = this.input.pointer1.x;
+                    this.startY = this.input.pointer1.y;
+                }	           
+            }
+            this.isSwiping = false;   
+        }
+        /*
+        var direction = this.swipe.check();
+        if (direction!==null) {
+        // direction= { x: x, y: y, direction: direction }
+            switch(direction.direction) {
+                case this.swipe.DIRECTION_LEFT: // do something
+                    this.player.body.velocity.x -= 300;
+                    break;
+                case this.swipe.DIRECTION_RIGHT:
+                    this.player.body.velocity.x += 300;
+                    break;
+                case this.swipe.DIRECTION_UP:
+                    this.player.body.velocity.y -= 300;
+                    break;
+                case this.swipe.DIRECTION_DOWN:
+                    this.player.body.velocity.y += 300;
+                    break;
+                case this.swipe.DIRECTION_UP_LEFT:
+                case this.swipe.DIRECTION_UP_RIGHT:
+                case this.swipe.DIRECTION_DOWN_LEFT:
+                case this.swipe.DIRECTION_DOWN_RIGHT:
+                    break;
+            }
+        }
+        */
+/*
+    //  only move when you click
+        if (this.input.pointer1.isDown){
+            this.physics.arcade.moveToXY(this.player, this.input.pointer1.x, this.input.pointer1.y, 700, 200);
+
+            if (Phaser.Rectangle.contains(this.player.body, this.input.x, this.input.y))
+            {
+                console.log("Phaser.Rectangle.contains()");
+                this.player.body.velocity.setTo(0, 0);
+            }
+        }else
+        {
+            this.player.body.velocity.setTo(0, 0);
+        }
+*/
+                /*
 		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
         if(this.input.pointer1.isDown && this.input.pointer2.isDown){
             this.olddistance = this.distance;
@@ -319,13 +526,37 @@ BasicGame.Game.prototype = {
             else if (!this.isZooming && this.olddistance < this.distance && this.distancedelta > 5 ){  
                 this.zoomIn(); 
             }
-        }else if(!this.isSwiping && this.input.pointer1.isDown){
+        }else if(this.input.pointer1.isDown){
             console.log("isDown");
+            if(!this.isSwiping ){
+                this.startX = this.input.pointer1.x;
+                this.startY = this.input.pointer1.y;
+            }else{
+                this.endX = this.input.pointer1.x;
+		        this.endY = this.input.pointer1.y; 
+
+                // determining x and y distance travelled by mouse/finger from the start
+                // of the swipe until the end
+                var distX = this.startX-this.endX;
+                var distY = this.startY-this.endY;
+                                // in order to have a vertical swipe, we need that y distance is at least twice the x distance
+                // and the amount of vertical distance is at least 10 pixels
+                if(Math.abs(distY)>5){
+                    // moving up, calling move function with horizontal and vertical tiles to move as arguments
+                    if(distY>0){
+                            this.zoomOut();
+                    }
+                    // moving down, calling move function with horizontal and vertical tiles to move as arguments
+                    else{
+                            this.zoomIn();
+                    }
+                }	     
+            }
             this.isSwiping = true;
-            this.startX = this.input.pointer1.x;
-            this.startY = this.input.pointer1.y;
-        }else if(this.isSwiping && this.input.pointer1.isUp){
+
+        }else if(this.input.pointer1.isUp){
             console.log("isUp");
+            if(this.isSwiping){
                 this.endX = this.input.pointer1.x;
 		        this.endY = this.input.pointer1.y; 
 
@@ -338,7 +569,7 @@ BasicGame.Game.prototype = {
 
                 // in order to have a vertical swipe, we need that y distance is at least twice the x distance
                 // and the amount of vertical distance is at least 10 pixels
-                if(Math.abs(distY)>10){
+                if(Math.abs(distY)>5){
                     // moving up, calling move function with horizontal and vertical tiles to move as arguments
                     if(distY>0){
                             this.zoomOut();
@@ -348,9 +579,10 @@ BasicGame.Game.prototype = {
                             this.zoomIn();
                     }
                 }	           
-                this.isSwiping = false;   
+            }
+            this.isSwiping = false;   
         }
-
+*/
         // luxes.
         //starfield.tilePosition.y += 2;
         //this.player.body.acceleration.x = 0;
@@ -479,7 +711,6 @@ BasicGame.Game.prototype = {
 
 	},
     zoomOut: function(){
-        console.log("zoomOut");
         if(this.floor == 3)
             return;
         this.isZooming = true;
@@ -510,7 +741,6 @@ BasicGame.Game.prototype = {
         this.isZooming = false;
     },
     zoomIn: function(){
-        console.log("zoomIn");
         if(this.floor == 1)
             return;
         this.isZooming = true;
@@ -571,8 +801,30 @@ BasicGame.Game.prototype = {
 
     },
     changeMap: function(){
+        this.layers[this.floor-1].remove(this.player);
+        this.layers[this.floor-1].setAll('alpha', 0.5);
+        this.floor = (this.floor==1) ? 2 : 1;
+        this.layers[this.floor-1].add(this.player);
+        this.layers[this.floor-1].setAll('alpha', 1);
         this.background.loadTexture('floor' + this.floor);
         this.player.loadTexture('plane' + this.floor);
+        this.levelSound.play();
+    },
+    endTabTimer: function() {
+        this.tabTimer.destroy();
+        this.tabTimer = this.time.create();
+     	this.tabTimer.add(200, this.endTabTimer,this);
+        console.log("stop");
+    },
+    pressTab: function(){
+        if(!this.tabTimer.running){
+            this.tabTimer.start();
+            console.log("start");
+        }
+        else{
+            this.endTabTimer();
+            this.changeMap();
+        }
     }
 
 };

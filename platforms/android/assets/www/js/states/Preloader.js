@@ -37,6 +37,12 @@ BasicGame.Preloader.prototype = {
     	this.load.spritesheet('dude', 'assets/images/dude.png', 32, 48);
 
     	// luxes.
+<<<<<<< HEAD
+    	this.load.image('butterfly', 'assets/images/butterfly.png');
+    	this.load.image('frog', 'assets/images/frog.png');
+    	this.load.image('pinwheel', 'assets/images/pinwheel.png');
+    	this.load.image('crane', 'assets/images/crane.png');
+=======
     	this.load.image('flight', 'assets/images/resize_plane_pink.png');
     	this.load.image('frog', 'assets/images/resize_frog_remake.png');
     	this.load.image('pinwheel', 'assets/images/pinwheel_remake.png');
@@ -45,6 +51,8 @@ BasicGame.Preloader.prototype = {
     	this.load.image('bullet', 'assets/images/bullet.png');
     	this.game.load.spritesheet('explosion', 'assets/images/explode.png', 128, 128);
     	this.game.load.spritesheet('crash', 'assets/images/crash_flight.png', 60, 100);
+>>>>>>> 981832fe3b3dc13c379b8ba3812be3cc5cf32438
+
 
     	this.load.image('bg1', 'assets/images/bg1.jpeg');
 
@@ -54,13 +62,15 @@ BasicGame.Preloader.prototype = {
 
 		this.load.image('plane1', 'assets/images/plane1.png');
     	this.load.image('plane2', 'assets/images/plane2.png');
-    	this.load.image('plane3', 'assets/images/plane3.png');
 
 
 
 		// Audio track Attribution (menu sci-fi 1.ogg, CC 3.0)
 		// Alexandr-Zhelanov: https://soundcloud.com/alexandr-zhelanov 
-		this.load.audio('bgm', ['assets/audio/menusci-fi1.ogg', 'assets/audio/menusci-fi1.mp3']);
+		//this.load.audio('bgm', ['assets/audio/menusci-fi1.ogg', 'assets/audio/menusci-fi1.mp3']);
+
+		this.load.audio('bgm', ['assets/audio/bgm.ogg', 'assets/audio/bgm.mp3']);
+      	this.load.audio('levelchange', ['assets/audio/levelchange.ogg', 'assets/audio/levelchange.mp3']);
 
 	},
 
@@ -72,11 +82,9 @@ BasicGame.Preloader.prototype = {
 
 	},
 	update: function () {
-
-		if (this.cache.isSoundDecoded('bgm') && this.ready == false) {
-			this.ready = true;
-			this.state.start('MainMenu');
-
+		if (this.cache.isSoundDecoded('bgm') && this.cache.isSoundDecoded('levelchange') && this.ready == false) {
+         this.ready = true;
+         this.state.start('MainMenu');
 		}
 	}
 
