@@ -3,6 +3,7 @@ BasicGame.MainMenu = function (game) {
 
 	this.bg;
 	this.music = null;
+	this.walk;
 
 };
 
@@ -14,9 +15,16 @@ BasicGame.MainMenu.prototype = {
         this.music.loop = true;
         this.music.play();
 
-		this.bg = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'starfield');
+		this.bg = this.add.sprite(0, 0, 'main_bg');
+		this.bg.height = game.height;
+		this.bg.width = game.width;
 
-		var text = this.add.text(this.game.width * 0.5, this.game.height * 0.5, 'Tap to Start!', {
+		this.walk = this.bg.animations.add('walk');
+
+		this.bg.animations.play('walk', 1, true);
+
+
+		var text = this.add.text(this.game.width * 0.5, this.game.height * 0.8, 'Tap to Start!', {
 			font: '42px Arial', fill: '#ffffff', align: 'center'
 		});
 		text.anchor.set(0.5);
