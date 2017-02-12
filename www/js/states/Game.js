@@ -54,17 +54,11 @@ BasicGame.Game = function (game) {
     this.playerTrail;
     this.bullets;
     this.playerBulletTimer;
-    this.BULLET_SPEED = 400;
-    this.BULLET_ELAPSE = 300;
     this.PLAYER_BOUND = 40;
     this.MIN_ENEMY_SPACING = 300;
     this.MAX_ENEMY_SPACING = 3000;
     this.explosions;
     this.crashes;
-    this.FROG_SPEED = 100;
-    this.BUTTERFLY_SPEED = 300;
-    this.PINWHEEL_SPEED = 400;
-    this.CRANE_SPEED = 600;
     this.shields;
     this.score = 0;
     this.scoreText;
@@ -72,6 +66,24 @@ BasicGame.Game = function (game) {
     this.music_level;
     this.music_bg;
     this.music_explode;
+    this.gameOver;
+    this.ENEMY_TIMER = 10;
+    this.ENEMY_ELAPSE = 0;
+    this.levlerTimer;
+
+    // the below variables to adjust the game level.
+    this.BULLET_SPEED = 400;        // the speed of a player's bullet.
+    this.BULLET_ELAPSE = 500;       // the time gap between firing a bullet.
+    this.ENEMY_SPACING = 500;      // the tame gap between generating an enemy;
+    this.FROG_SPEED = 100;          // the frog's movement speed.
+    this.BUTTERFLY_SPEED = 300;     // the butterfly's movement speed.
+    this.PINWHEEL_SPEED = 400;      // the pinwheel's movement speed.
+    this.CRANE_SPEED = 600;         // the crane's movement speed.
+
+    this.LEVEL_TIMER = 5000;       // the time gap between increasing the current game level.
+    this.BULLET_SPEED_DELTA = 0;    // the value to decrease bullets' speed when the game level increses.
+    this.ENEMY_SPACING_DELTA = 10; // the value to decrease the enemy spacing when the game level increses.
+    this.ENEMY_SPEED_DELTA = 10;    // the value to increase enemies' movement speed when the game level increses.
 };
 
 BasicGame.Game.prototype = {
@@ -118,7 +130,7 @@ BasicGame.Game.prototype = {
         this.explosions = game.add.group();
         this.explosions.enableBody = true;
         this.explosions.physicsBodyType = Phaser.Physics.ARCADE;
-        this.explosions.createMultiple(30, 'explosion');
+        this.explosions.createMultiple(100, 'explosion');
         this.explosions.setAll('anchor.x', 0.5);
         this.explosions.setAll('anchor.y', 0.5);
         this.explosions.forEach( function(explosion) {
@@ -196,8 +208,13 @@ BasicGame.Game.prototype = {
         });
 
         this.bulletTimer = this.game.time.create(false);
-        this.bulletTimer.loop(1000, this.launchEnemy, this);
+        this.bulletTimer.loop(this.ENEMY_TIMER, this.launchEnemy, this);
         this.bulletTimer.start();
+        //this.game.time.events.add(1000, this.launchEnemy);
+
+        this.levlerTimer = this.game.time.create(false);
+        this.levlerTimer.loop(this.LEVEL_TIMER, this.levelUpdate, this);
+        this.levlerTimer.start();
 
 
         this.tabTimer = this.time.create();
@@ -238,9 +255,32 @@ BasicGame.Game.prototype = {
         this.scoreText = this.game.add.text(10, 10,
          'Score: ' + this.score, { font: '20px Arial', fill: '#fff' });
 
+        // Game over
+        this.gameOver = this.game.add.text(this.
+            game.world.centerX, this.game.world.centerY,
+             'GAME OVER!', { font: '72px Arial', fill: '#fff' });
+        this.gameOver.anchor.setTo(0.5, 0.5);
+        this.gameOver.visible = false;
+
         this.input.onDown.add(this.pressTab, this);
 
+        //this.cursors = this.game.input.keyboard.createCursorKeys();
+
 	},
+
+    levelUpdate: function () {
+        this.BULLET_SPEED -= this.BULLET_SPEED_DELTA;
+        this.ENEMY_SPACING -= this.ENEMY_SPACING_DELTA;
+        if (this.ENEMY_SPACING < 0)
+            this.ENEMY_SPACING = 1;
+
+        this.FROG_SPEED += this.ENEMY_SPEED_DELTA;
+        this.BUTTERFLY_SPEED += this.ENEMY_SPEED_DELTA;
+        this.PINWHEEL_SPEED += this.ENEMY_SPEED_DELTA;
+        this.CRANE_SPEED += this.ENEMY_SPEED_DELTA;
+
+        console.log("game level increased");
+    },
 
     displayHP: function () {
         this.shields.setText("HP: " + this.player.health + "%");
@@ -267,7 +307,50 @@ BasicGame.Game.prototype = {
     },
 
     launchEnemy: function () {
-        var bulletType = this.game.rnd.integerInRange(1, 4);
+        this.ENEMY_ELAPSE += this.ENEMY_TIMER;
+        if (this.ENEMY_ELAPSE < this.ENEMY_SPACING)
+            return;
+        this.ENEMY_ELAPSE = 0;
+
+        var ranBullet = this.game.rnd.integerInRange(1, 2);
+        var genFloor = this.game.rnd.integerInRange(1, 100);
+        var bulletType;
+        if (genFloor <= 70) // launch an enemy on the player's floor.
+        {
+            if (this.floor == 1)
+            {
+                if (ranBullet == 1)
+                    bulletType = 1;
+                else
+                    bulletType = 2;
+            }
+            else
+            {
+                if (ranBullet == 1)
+                    bulletType = 3;
+                else
+                    bulletType = 4;
+            }
+        }
+        else // do not launch an enemy on the player's floor.
+        {
+            if (this.floor == 1)
+            {
+                if (ranBullet == 1)
+                    bulletType = 3;
+                else
+                    bulletType = 4;
+            }
+            else
+            {
+                if (ranBullet == 1)
+                    bulletType = 1;
+                else
+                    bulletType = 2;
+            }
+        }
+
+        //var bulletType = this.game.rnd.integerInRange(1, 4);
         var bullet;
         var bulletSpeed;
         if (bulletType == 1) {
@@ -335,7 +418,8 @@ BasicGame.Game.prototype = {
             this.game.physics.arcade.velocityFromAngle(
                 bullet.angle - 90, bulletSpeed, bullet.body.velocity);
 
-            //this.game.time.events.add(this.game.rnd.integerInRange(this.MIN_ENEMY_SPACING, this.MAX_ENEMY_SPACING), this.launchEnemy);
+            //this.game.time.events.add(1000, this.launchEnemy);
+            console.log("launched an enemy")
         }
     },
 
@@ -429,11 +513,83 @@ BasicGame.Game.prototype = {
             }
             this.isSwiping = false;   
         }
-  
+
+        //starfield.tilePosition.y += 2;
+        //this.player.body.acceleration.x = 0;
+        this.player.body.velocity.setTo(0, 0);
+        this.allStop();
+/*
+        if (this.cursors.left.isDown)
+        {
+            this.player.body.velocity.x = -200;
+            //this.player.body.acceleration.x = -this.ACCLERATION;
+            this.allStart();
+        }
+        else if (this.cursors.right.isDown)
+        {
+            this.player.body.velocity.x = 200;
+            //this.player.body.acceleration.x = this.ACCLERATION;
+            this.allStart();
+        }
+*/
+        if (this.player.x > this.game.width - this.PLAYER_BOUND) {
+            this.player.x = this.game.width - this.PLAYER_BOUND;
+            //this.player.body.acceleration.x = 0;
+            this.player.body.velocity.x = 0;
+        }
+        if (this.player.x < this.PLAYER_BOUND) {
+            this.player.x = this.PLAYER_BOUND;
+            //this.player.body.acceleration.x = 0;
+            this.player.body.velocity.x = 0;
+        }
+
+        // Check game over.
+        if (!this.player.alive && this.gameOver.visible === false) {
+            this.gameOver.visible = true;
+            this.gameOver.alpha = 0;
+            var fadeInGameOver = this.game.add.tween(this.gameOver);
+            fadeInGameOver.to({alpha: 1}, 1000, Phaser.Easing.Quintic.Out);
+            fadeInGameOver.onComplete.add(setResetHandlers);
+            fadeInGameOver.start();
+            this.bulletTimer.stop();
+            function setResetHandlers() {
+                tapRestart = this.game.input.onTap.addOnce(_restart,this);
+                function _restart() {
+                    tapRestart.detach();
+                    //this.restart();
+                }
+            }
+        }
 
         this.game.physics.arcade.overlap(this.layers[this.floor-1], this.bullets, this.hitEnemy, null, this);
-        this.game.physics.arcade.overlap(this.player, this.layers[this.floor-1], this.shipCollide, null, this);
+        //this.game.physics.arcade.overlap(this.player, this.layers[this.floor-1], this.shipCollide, null, this);
+        if (this.floor == 1)
+        {
+            this.game.physics.arcade.overlap(this.player, this.frog, this.shipCollide, null, this);
+            this.game.physics.arcade.overlap(this.player, this.pinwheels, this.shipCollide, null, this);
+        }
+        else if (this.floor == 2)
+        {
+            this.game.physics.arcade.overlap(this.player, this.butterfly, this.shipCollide, null, this);
+            this.game.physics.arcade.overlap(this.player, this.cranes, this.shipCollide, null, this);
+        }
 	},
+
+    restart: function () {
+        //  Reset the enemies
+        this.frogs.callAll('kill');
+        this.bulletTimer.start();
+
+        //  Revive the player
+        this.player.revive();
+        this.player.health = 100;
+        this.shields.render();
+        this.score = 0;
+        this.scoreText.render();
+
+        //  Hide the text
+        this.gameOver.visible = false;
+    },
 
     allStop: function () {
         this.frogs.forEach(function(element){
@@ -455,6 +611,9 @@ BasicGame.Game.prototype = {
         this.bullets.forEach(function(element) {
             element.body.enable = false;
         });
+
+        this.bulletTimer.pause();
+        this.levlerTimer.pause();
     },
 
     allStart: function () {
@@ -477,6 +636,9 @@ BasicGame.Game.prototype = {
         this.bullets.forEach(function(element) {
             element.body.enable = true;
         });
+
+        this.bulletTimer.resume();
+        this.levlerTimer.resume();
     },
 
     hitEnemy: function (enemy, bullet) {
@@ -510,7 +672,7 @@ BasicGame.Game.prototype = {
 
         enemy.kill();
 
-        player.damage(enemy.damageAmount);
+        this.player.damage(enemy.damageAmount);
         this.displayHP();
     },
 
