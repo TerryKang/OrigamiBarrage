@@ -30,12 +30,6 @@ BasicGame.Preloader.prototype = {
 		//	Here we load the rest of the assets our game needs.
 		//	You can find all of these assets in the Phaser Examples repository
 
-		//this.load.image('starfield', 'assets/images/starfield.png');
-		this.load.image('sky', 'assets/images/sky.png');
-		this.load.image('ground', 'assets/images/platform.png');
-    	this.load.image('star', 'assets/images/star.png');
-    	this.load.spritesheet('dude', 'assets/images/dude.png', 32, 48);
-
     	// luxes.
     	this.load.image('butterfly', 'assets/images/butterfly.png');
     	this.load.image('frog', 'assets/images/frog.png');
@@ -49,8 +43,6 @@ BasicGame.Preloader.prototype = {
     	this.game.load.spritesheet('explosion', 'assets/images/explode.png', 128, 128);
     	this.game.load.spritesheet('crash', 'assets/images/crash_flight.png', 60, 100);
 
-
-    	this.load.image('bg1', 'assets/images/bg1.jpeg');
 
 		this.load.image('floor1', 'assets/images/bg1.png');
 		this.load.image('floor3', 'assets/images/bg2.png');

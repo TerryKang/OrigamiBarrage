@@ -98,7 +98,7 @@ BasicGame.Game.prototype = {
 
         this.time.advancedTiming = true;
 
-	    this.background = game.add.tileSprite(0, 0, this.game.width, this.game.height, 'floor3');
+	    this.background = game.add.tileSprite(0, 0, this.game.width, this.game.height, 'floor2');
         this.background.tileScale.set(game.width/720,game.height/1028);
 
 
@@ -428,8 +428,10 @@ BasicGame.Game.prototype = {
         this.player.body.velocity.x = 0;
         this.player.body.velocity.y = 0;
         this.background.tilePosition.y += 1;
+        this.allStop();
 
         if(this.input.pointer1.isDown){
+            this.allStart();
             if(!this.isSwiping ){
                 this.startX = this.input.pointer1.x;
                 this.startY = this.input.pointer1.y;
@@ -516,8 +518,8 @@ BasicGame.Game.prototype = {
 
         //starfield.tilePosition.y += 2;
         //this.player.body.acceleration.x = 0;
-        this.player.body.velocity.setTo(0, 0);
-        this.allStop();
+//        this.player.body.velocity.setTo(0, 0);
+//        this.allStop();
 /*
         if (this.cursors.left.isDown)
         {
@@ -565,7 +567,7 @@ BasicGame.Game.prototype = {
         //this.game.physics.arcade.overlap(this.player, this.layers[this.floor-1], this.shipCollide, null, this);
         if (this.floor == 1)
         {
-            this.game.physics.arcade.overlap(this.player, this.frog, this.shipCollide, null, this);
+            this.game.physics.arcade.overlap(this.player, this.frogs, this.shipCollide, null, this);
             this.game.physics.arcade.overlap(this.player, this.pinwheels, this.shipCollide, null, this);
         }
         else if (this.floor == 2)
