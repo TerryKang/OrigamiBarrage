@@ -121,7 +121,7 @@ BasicGame.Game.prototype = {
         this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
         this.player.body.maxVelocity.setTo(this.MAXSPEED, this.MAXSPEED);
         this.player.body.drag.setTo(this.DRAG, this.DRAG);
-        //this.player.scale.setTo(this.PLAYER_SCALE, this.PLAYER_SCALE);
+        this.player.scale.setTo(1, 0.75);
         this.player.health = 100;
 
         // player's bullets.
@@ -226,10 +226,11 @@ BasicGame.Game.prototype = {
         this.layers[0] =  this.game.add.group();
         this.layers[1] =  this.game.add.group();
 
-        this.layers[0].z = 0;
+
+        this.layers[0].z = 1;
         this.layers[0].add(this.frogs);
         this.layers[0].add(this.pinwheels);
-        this.layers[1].z = 1;
+        this.layers[1].z = 3;
         this.layers[1].add(this.cranes);
         this.layers[1].add(this.butterfly);
 
@@ -238,9 +239,11 @@ BasicGame.Game.prototype = {
         this.mainLayer = this.game.add.group();
         this.mainLayer.add(this.layers[0]);
         this.mainLayer.add(this.layers[1]);
+        this.mainLayer.add(this.player);
+
 
         this.floor = 2;
-        this.layers[this.floor-1].add(this.player);
+        this.player.z = this.floor;
         this.layers[0].setAll('alpha', 0.5);
         this.layers[this.floor-1].setAll('alpha', 1);
         this.mainLayer.sort('z', Phaser.Group.SORT_ASCENDING);
@@ -578,6 +581,7 @@ BasicGame.Game.prototype = {
         // luxes.
         //starfield.tilePosition.y += 2;
         //this.player.body.acceleration.x = 0;
+        /*
         this.player.body.velocity.setTo(0, 0);
         this.allStop();
 
@@ -604,7 +608,7 @@ BasicGame.Game.prototype = {
             //this.player.body.acceleration.x = 0;
             this.player.body.velocity.x = 0;
         }
-
+*/
         // Note: The below code is prolly not neccessary.
         /*this.bank = this.player.body.velocity.x / this.MAXSPEED;
         this.player.scale.x = 1 - Math.abs(this.bank) * 0.5;
@@ -613,6 +617,7 @@ BasicGame.Game.prototype = {
         this.playerTrail.x = this.player.x;*/
 
         // Check collisions.
+        /*
         this.game.physics.arcade.overlap(this.player, this.frogs, this.shipCollide, null, this);
         this.game.physics.arcade.overlap(this.player, this.pinwheels, this.shipCollide, null, this);
         this.game.physics.arcade.overlap(this.player, this.cranes, this.shipCollide, null, this);
@@ -622,6 +627,7 @@ BasicGame.Game.prototype = {
         this.game.physics.arcade.overlap(this.pinwheels, this.bullets, this.hitEnemy, null, this);
         this.game.physics.arcade.overlap(this.cranes, this.bullets, this.hitEnemy, null, this);
         this.game.physics.arcade.overlap(this.butterfly, this.bullets, this.hitEnemy, null, this);
+        */
 
         // Check game over.
         if (!this.player.alive && this.gameOver.visible === false) {
@@ -640,6 +646,9 @@ BasicGame.Game.prototype = {
                 }
             }
         }
+
+        this.game.physics.arcade.overlap(this.layers[this.floor-1], this.bullets, this.hitEnemy, null, this);
+        this.game.physics.arcade.overlap(this.player, this.layers[this.floor-1], this.shipCollide, null, this);
 	},
 
     restart: function () {
@@ -834,11 +843,12 @@ BasicGame.Game.prototype = {
 
     },
     changeMap: function(){
-        this.layers[this.floor-1].remove(this.player);
+        //this.layers[this.floor-1].remove(this.player);
         this.layers[this.floor-1].setAll('alpha', 0.5);
         this.floor = (this.floor==1) ? 2 : 1;
-        this.layers[this.floor-1].add(this.player);
         this.layers[this.floor-1].setAll('alpha', 1);
+        this.player.z = this.floor;
+        this.mainLayer.sort('z', Phaser.Group.SORT_ASCENDING);
         this.background.loadTexture('floor' + this.floor);
         this.player.loadTexture('plane' + this.floor);
         this.levelSound.play();
