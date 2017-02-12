@@ -32,6 +32,7 @@ BasicGame.Game = function (game) {
     this.starfield;
     this.frogs;
     this.pinwheels;
+    this.butterfly;
     this.bulletTimer;
     this.layers = [];
     this.isZooming;
@@ -42,6 +43,30 @@ BasicGame.Game = function (game) {
     this.tabTimer;
     this.mainLayer;
     this.playerVelocity;
+    this.startX;
+    this.startY;
+    this.endX;
+    this.endY;
+    this.cursors;
+    this.ACCLERATION = 600;
+    this.DRAG = 400;
+    this.MAXSPEED = 400;
+    this.PLAYER_SCALE = 0.06;
+    this.bank;
+    this.playerTrail;
+    this.bullets;
+    this.playerBulletTimer;
+    this.BULLET_SPEED = 400;
+    this.BULLET_ELAPSE = 300;
+    this.PLAYER_BOUND = 40;
+    this.MIN_ENEMY_SPACING = 300;
+    this.MAX_ENEMY_SPACING = 3000;
+    this.explosions;
+    this.crashes;
+    this.FROG_SPEED = 100;
+    this.BUTTERFLY_SPEED = 300;
+    this.PINWHEEL_SPEED = 400;
+    this.CRANE_SPEED = 600;
 };
 
 BasicGame.Game.prototype = {
@@ -87,66 +112,93 @@ BasicGame.Game.prototype = {
 
 
         // luxes.
-        this.player = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'plane2');       
+        this.player = this.add.sprite(this.world.centerX, this.game.height - 70, 'plane2');       
         this.player.anchor.setTo(0.5, 0.5);
-        this.player.scale.setTo(1, 0.75);
+        his.player.scale.setTo(1, 0.75);
+        this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
+        this.player.body.maxVelocity.setTo(this.MAXSPEED, this.MAXSPEED);
+        this.player.body.drag.setTo(this.DRAG, this.DRAG);
+        this.player.scale.setTo(this.PLAYER_SCALE, this.PLAYER_SCALE);
+
+        // player's bullets.
+        this.bullets = this.game.add.group();
+        this.bullets.enableBody = true;
+        this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+        this.bullets.createMultiple(30, 'bullet');
+        this.bullets.setAll('anchor.x', 0.5);
+        this.bullets.setAll('anchor.y', 1);
+        this.bullets.setAll('outOfBoundsKill', true);
+        this.bullets.setAll('checkWorldBounds', true);
+
+        // explosions.
+        this.explosions = game.add.group();
+        this.explosions.enableBody = true;
+        this.explosions.physicsBodyType = Phaser.Physics.ARCADE;
+        this.explosions.createMultiple(30, 'explosion');
+        this.explosions.setAll('anchor.x', 0.5);
+        this.explosions.setAll('anchor.y', 0.5);
+        this.explosions.forEach( function(explosion) {
+            explosion.animations.add('explosion');
+        });
+
+        this.crashes = game.add.group();
+        this.crashes.enableBody = true;
+        this.crashes.physicsBodyType = Phaser.Physics.ARCADE;
+        this.crashes.createMultiple(30, 'crash');
+        this.crashes.setAll('anchor.x', 0.5);
+        this.crashes.setAll('anchor.y', 0.5);
+        this.crashes.forEach( function(crash) {
+            crash.animations.add('crash');
+        });
+
+        this.playerBulletTimer = this.game.time.create(false);
+        this.playerBulletTimer.loop(this.BULLET_ELAPSE, this.fireBullet, this);
+        this.playerBulletTimer.start();
+
         this.camera.follow(this.player);
         this.physics.enable(this.player, Phaser.Physics.ARCADE);
         this.playerVelocity=400;
 
 
-        // bullets.
+        // enemies.
         this.frogs = this.game.add.group();
-        //frogs.scale.set(0.01, 0.01);
         this.frogs.enableBody = true;
         this.frogs.physicsBodyType = Phaser.Physics.ARCADE;
         this.frogs.createMultiple(100, 'frog');
         this.frogs.setAll('anchor.x', 0.5);
         this.frogs.setAll('anchor.y', 0.5);
-        //this.frogs.setAll('scale.x', 0.10);
-        //this.frogs.setAll('scale.y', 0.10);
         this.frogs.setAll('outOfBoundsKill', true);
         this.frogs.setAll('checkWorldBounds', true);
 
         this.pinwheels = this.game.add.group();
-        //pinwheels.scale.set(0.01, 0.01);
         this.pinwheels.enableBody = true;
         this.pinwheels.physicsBodyType = Phaser.Physics.ARCADE;
         this.pinwheels.createMultiple(100, 'pinwheel');
         this.pinwheels.setAll('anchor.x', 0.5);
         this.pinwheels.setAll('anchor.y', 0.5);
-        //this.pinwheels.setAll('scale.x', 0.10);
-        //this.pinwheels.setAll('scale.y', 0.10);
         this.pinwheels.setAll('outOfBoundsKill', true);
         this.pinwheels.setAll('checkWorldBounds', true);
 
         this.cranes = this.game.add.group();
-        //pinwheels.scale.set(0.01, 0.01);
         this.cranes.enableBody = true;
         this.cranes.physicsBodyType = Phaser.Physics.ARCADE;
         this.cranes.createMultiple(100, 'crane');
         this.cranes.setAll('anchor.x', 0.5);
         this.cranes.setAll('anchor.y', 0.5);
-        //this.cranes.setAll('scale.x', 0.10);
-        //this.cranes.setAll('scale.y', 0.10);
         this.cranes.setAll('outOfBoundsKill', true);
         this.cranes.setAll('checkWorldBounds', true);
 
         this.butterfly = this.game.add.group();
-        //pinwheels.scale.set(0.01, 0.01);
         this.butterfly.enableBody = true;
         this.butterfly.physicsBodyType = Phaser.Physics.ARCADE;
         this.butterfly.createMultiple(100, 'butterfly');
         this.butterfly.setAll('anchor.x', 0.5);
         this.butterfly.setAll('anchor.y', 0.5);
-        //this.cranes.setAll('scale.x', 0.10);
-        //this.cranes.setAll('scale.y', 0.10);
         this.butterfly.setAll('outOfBoundsKill', true);
         this.butterfly.setAll('checkWorldBounds', true);
 
-
         this.bulletTimer = this.game.time.create(false);
-        this.bulletTimer.loop(1000, this.bulletTimerUpdate, this);
+        this.bulletTimer.loop(1000, this.launchEnemy, this);
         this.bulletTimer.start();
 
 
@@ -179,30 +231,52 @@ BasicGame.Game.prototype = {
         this.input.onDown.add(this.pressTab, this);
 
 	},
-
-    bulletTimerUpdate: function () {
-        var bulletType = this.game.rnd.integerInRange(1, 4);
-        var bullet;
-        if (bulletType == 1)
-            bullet = this.frogs.getFirstExists(false);
-        else if (bulletType == 2)
-            bullet = this.pinwheels.getFirstExists(false);
-        else if (bulletType == 3)
-            bullet = this.cranes.getFirstExists(false);
-        else if (bulletType == 4)
-            bullet = this.butterfly.getFirstExists(false);
+    fireBullet: function () {
+        var bullet = this.bullets.getFirstExists(false);
 
         if (bullet)
         {
-            var bulletSpeed = this.game.rnd.integerInRange(100, 600);
+            var bulletOffset = 20 * Math.sin(this.game.math.degToRad(this.player.angle));
+            bullet.reset(this.player.x + bulletOffset, this.player.y);
+            bullet.angle = this.player.angle;
+            this.game.physics.arcade.velocityFromAngle(bullet.angle - 90, this.BULLET_SPEED, bullet.body.velocity);
+            bullet.body.velocity.x += this.player.body.velocity.x;
+        }
+    },
+
+    launchEnemy: function () {
+        var bulletType = this.game.rnd.integerInRange(1, 4);
+        var bullet;
+        var bulletSpeed;
+        if (bulletType == 1) {
+            bullet = this.frogs.getFirstExists(false);
+            bulletSpeed = this.FROG_SPEED;
+        }
+        else if (bulletType == 2) {
+            bullet = this.pinwheels.getFirstExists(false);
+            bulletSpeed = this.PINWHEEL_SPEED;
+        }
+        else if (bulletType == 3) {
+            bullet = this.cranes.getFirstExists(false);
+            bulletSpeed = this.CRANE_SPEED;
+        }
+        else if (bulletType == 4) {
+            bullet = this.butterfly.getFirstExists(false);
+            bulletSpeed = this.BUTTERFLY_SPEED;
+        }
+
+        if (bullet)
+        {
+            //var bulletSpeed = this.game.rnd.integerInRange(100, 600);
             var factor = this.game.rnd.frac();
 
-            var cx = this.world.centerX;
-            var cy = this.world.centerY;
-            var centerPoint = new Phaser.Point(cx, cy);
+            //var cx = this.world.centerX;
+            //var cy = this.world.centerY;
+            //var centerPoint = new Phaser.Point(cx, cy);
+            var centerPoint = new Phaser.Point(this.player.x, this.player.y);
             var bulletPoint = new Phaser.Point(0, 0);
 
-            var side = this.game.rnd.integerInRange(1, 4);
+            var side = this.game.rnd.integerInRange(1, 1);
             if (side == 1) // top
             {
                 var posX = this.game.width * factor;
@@ -240,7 +314,10 @@ BasicGame.Game.prototype = {
             angle = angle;
             bullet.angle = angle + 90;
             console.log(angle);
-            this.game.physics.arcade.velocityFromAngle(bullet.angle - 90, bulletSpeed, bullet.body.velocity);
+            this.game.physics.arcade.velocityFromAngle(
+                bullet.angle - 90, bulletSpeed, bullet.body.velocity);
+
+            //this.game.time.events.add(this.game.rnd.integerInRange(this.MIN_ENEMY_SPACING, this.MAX_ENEMY_SPACING), this.launchEnemy);
         }
     },
 
@@ -444,7 +521,121 @@ BasicGame.Game.prototype = {
 */
         // luxes.
         //starfield.tilePosition.y += 2;
+        //this.player.body.acceleration.x = 0;
+        this.player.body.velocity.setTo(0, 0);
+        this.allStop();
+
+        if (this.cursors.left.isDown)
+        {
+            this.player.body.velocity.x = -200;
+            //this.player.body.acceleration.x = -this.ACCLERATION;
+            this.allStart();
+        }
+        else if (this.cursors.right.isDown)
+        {
+            this.player.body.velocity.x = 200;
+            //this.player.body.acceleration.x = this.ACCLERATION;
+            this.allStart();
+        }
+
+        if (this.player.x > this.game.width - this.PLAYER_BOUND) {
+            this.player.x = this.game.width - this.PLAYER_BOUND;
+            //this.player.body.acceleration.x = 0;
+            this.player.body.velocity.x = 0;
+        }
+        if (this.player.x < this.PLAYER_BOUND) {
+            this.player.x = this.PLAYER_BOUND;
+            //this.player.body.acceleration.x = 0;
+            this.player.body.velocity.x = 0;
+        }
+
+        // Note: The below code is prolly not neccessary.
+        /*this.bank = this.player.body.velocity.x / this.MAXSPEED;
+        this.player.scale.x = 1 - Math.abs(this.bank) * 0.5;
+        this.player.scale.x *= this.PLAYER_SCALE;
+        this.player.angle = this.bank * 5;
+        this.playerTrail.x = this.player.x;*/
+
+        this.game.physics.arcade.overlap(this.player, this.frogs, this.shipCollide, null, this);
+        this.game.physics.arcade.overlap(this.player, this.pinwheels, this.shipCollide, null, this);
+        this.game.physics.arcade.overlap(this.player, this.cranes, this.shipCollide, null, this);
+        this.game.physics.arcade.overlap(this.player, this.butterfly, this.shipCollide, null, this);
+
+        this.game.physics.arcade.overlap(this.frogs, this.bullets, this.hitEnemy, null, this);
+        this.game.physics.arcade.overlap(this.pinwheels, this.bullets, this.hitEnemy, null, this);
+        this.game.physics.arcade.overlap(this.cranes, this.bullets, this.hitEnemy, null, this);
+        this.game.physics.arcade.overlap(this.butterfly, this.bullets, this.hitEnemy, null, this);
 	},
+
+    allStop: function () {
+        this.frogs.forEach(function(element){
+            element.body.enable = false;
+        });
+
+        this.pinwheels.forEach(function(element){
+            element.body.enable = false;
+        });
+
+        this.cranes.forEach(function(element){
+            element.body.enable = false;
+        });
+
+        this.butterfly.forEach(function(element){
+            element.body.enable = false;
+        });
+
+        this.bullets.forEach(function(element) {
+            element.body.enable = false;
+        });
+    },
+
+    allStart: function () {
+        this.frogs.forEach(function(element){
+            element.body.enable = true;
+        });
+
+        this.pinwheels.forEach(function(element){
+            element.body.enable = true;
+        });
+
+        this.cranes.forEach(function(element){
+            element.body.enable = true;
+        });
+
+        this.butterfly.forEach(function(element){
+            element.body.enable = true;
+        });
+
+        this.bullets.forEach(function(element) {
+            element.body.enable = true;
+        });
+    },
+
+    hitEnemy: function (enemy, bullet) {
+        var explosion = this.explosions.getFirstExists(false);
+        explosion.reset(bullet.body.x + bullet.body.halfWidth, bullet.body.y + bullet.body.halfHeight);
+        explosion.body.velocity.y = enemy.body.velocity.y;
+        explosion.alpha = 0.7;
+        explosion.play('explosion', 30, false, true);
+        enemy.kill();
+        bullet.kill()
+    },
+
+    shipCollide: function (player, enemy) {
+        var explosion = this.explosions.getFirstExists(false);
+        explosion.reset(enemy.body.x + enemy.body.halfWidth, enemy.body.y + enemy.body.halfHeight);
+        explosion.body.velocity.y = enemy.body.velocity.y;
+        explosion.alpha = 0.7;
+        explosion.play('explosion', 30, false, true);
+
+        var crash = this.crashes.getFirstExists(false);
+        crash.reset(player.body.x + player.body.halfWidth, player.body.y + player.body.halfHeight);
+        crash.body.velocity.y = player.body.velocity.y;
+        crash.alpha = 0.7;
+        crash.play('crash', 30, false, true);
+
+        enemy.kill();
+    },
 
 	quitGame: function (pointer) {
 
@@ -471,6 +662,14 @@ BasicGame.Game.prototype = {
             if(this.floor == 3)
                 this.worldScale = 1;
             else this.worldScale = 2;
+
+            for (var i = 0; i < 3; i++)
+            {
+                if (i != this.floor - 1)
+                    this.layers[i].setAll('alpha', 0.5);
+                else
+                    this.layers[i].setAll('alpha', 1);
+            }
         }
         this.scaleMap(this.worldScale);
         
@@ -491,6 +690,14 @@ BasicGame.Game.prototype = {
             this.layers[this.floor-1].add(this.player);
             this.changeMap();
             this.worldScale = 1;
+
+            for (var i = 0; i < 3; i++)
+            {
+                if (i != this.floor - 1)
+                    this.layers[i].setAll('alpha', 0.5);
+                else
+                    this.layers[i].setAll('alpha', 1);
+            }
         }
 
         // set our world scale as needed

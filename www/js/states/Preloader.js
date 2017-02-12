@@ -41,6 +41,9 @@ BasicGame.Preloader.prototype = {
     	this.load.image('frog', 'assets/images/frog.png');
     	this.load.image('pinwheel', 'assets/images/pinwheel.png');
     	this.load.image('crane', 'assets/images/crane.png');
+    	this.load.image('bullet', 'assets/images/bullet.png');
+    	this.game.load.spritesheet('explosion', 'assets/images/explode.png', 128, 128);
+    	this.game.load.spritesheet('crash', 'assets/images/crash_flight.png', 60, 100);
 
 
     	this.load.image('bg1', 'assets/images/bg1.jpeg');
