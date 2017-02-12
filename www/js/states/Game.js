@@ -258,11 +258,11 @@ BasicGame.Game.prototype = {
         // luxes.
         //starfield.tilePosition.y += 2;
         if (zoomInKey.isDown || game.input.activePointer.isDown) {
-            this.zoomIn();
+            //this.zoomIn();
         }
 
         if (zoomOutKey.isDown || game.input.activePointer.isDown) {
-            this.zoomOut();
+            //this.zoomOut();
         }
 	},
 
