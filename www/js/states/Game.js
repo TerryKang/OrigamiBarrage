@@ -82,8 +82,9 @@ BasicGame.Game = function (game) {
 
     this.LEVEL_TIMER = 5000;       // the time gap between increasing the current game level.
     this.BULLET_SPEED_DELTA = 0;    // the value to decrease bullets' speed when the game level increses.
-    this.ENEMY_SPACING_DELTA = 10; // the value to decrease the enemy spacing when the game level increses.
+    this.ENEMY_SPACING_DELTA = 10;  // the value to decrease the enemy spacing when the game level increses.
     this.ENEMY_SPEED_DELTA = 10;    // the value to increase enemies' movement speed when the game level increses.
+    this.NUM_GEN_ENEMIES = 1;       // the number of enemies that are generated at the same time.
 };
 
 BasicGame.Game.prototype = {
@@ -278,6 +279,7 @@ BasicGame.Game.prototype = {
         this.BUTTERFLY_SPEED += this.ENEMY_SPEED_DELTA;
         this.PINWHEEL_SPEED += this.ENEMY_SPEED_DELTA;
         this.CRANE_SPEED += this.ENEMY_SPEED_DELTA;
+        this.NUM_GEN_ENEMIES++;
 
         console.log("game level increased");
     },
@@ -312,114 +314,117 @@ BasicGame.Game.prototype = {
             return;
         this.ENEMY_ELAPSE = 0;
 
-        var ranBullet = this.game.rnd.integerInRange(1, 2);
-        var genFloor = this.game.rnd.integerInRange(1, 100);
-        var bulletType;
-        if (genFloor <= 70) // launch an enemy on the player's floor.
+        for (var i = 0; i < this.NUM_GEN_ENEMIES; i++)
         {
-            if (this.floor == 1)
+            var ranBullet = this.game.rnd.integerInRange(1, 2);
+            var genFloor = this.game.rnd.integerInRange(1, 100);
+            var bulletType;
+            if (genFloor <= 90) // launch an enemy on the player's floor.
             {
-                if (ranBullet == 1)
-                    bulletType = 1;
+                if (this.floor == 1)
+                {
+                    if (ranBullet == 1)
+                        bulletType = 1;
+                    else
+                        bulletType = 2;
+                }
                 else
-                    bulletType = 2;
+                {
+                    if (ranBullet == 1)
+                        bulletType = 3;
+                    else
+                        bulletType = 4;
+                }
             }
-            else
+            else // do not launch an enemy on the player's floor.
             {
-                if (ranBullet == 1)
-                    bulletType = 3;
+                if (this.floor == 1)
+                {
+                    if (ranBullet == 1)
+                        bulletType = 3;
+                    else
+                        bulletType = 4;
+                }
                 else
-                    bulletType = 4;
+                {
+                    if (ranBullet == 1)
+                        bulletType = 1;
+                    else
+                        bulletType = 2;
+                }
             }
-        }
-        else // do not launch an enemy on the player's floor.
-        {
-            if (this.floor == 1)
+
+            //var bulletType = this.game.rnd.integerInRange(1, 4);
+            var bullet;
+            var bulletSpeed;
+            if (bulletType == 1) {
+                bullet = this.frogs.getFirstExists(false);
+                bulletSpeed = this.FROG_SPEED;
+            }
+            else if (bulletType == 2) {
+                bullet = this.pinwheels.getFirstExists(false);
+                bulletSpeed = this.PINWHEEL_SPEED;
+            }
+            else if (bulletType == 3) {
+                bullet = this.cranes.getFirstExists(false);
+                bulletSpeed = this.CRANE_SPEED;
+            }
+            else if (bulletType == 4) {
+                bullet = this.butterfly.getFirstExists(false);
+                bulletSpeed = this.BUTTERFLY_SPEED;
+            }
+
+            if (bullet)
             {
-                if (ranBullet == 1)
-                    bulletType = 3;
-                else
-                    bulletType = 4;
+                var factor = this.game.rnd.frac();
+
+                var centerPoint = new Phaser.Point(this.player.x, this.player.y);
+                var bulletPoint = new Phaser.Point(0, 0);
+
+                var side = this.game.rnd.integerInRange(1, 1);
+                if (side == 1) // top
+                {
+                    var posX = this.game.width * factor;
+
+                    bullet.reset(posX, 0);
+
+                    bulletPoint = new Phaser.Point(posX, 0);
+                }
+                else if (side == 2) // bottom
+                {
+                    var posX = this.game.width * factor;
+
+                    bullet.reset(posX, this.game.height);
+
+                    bulletPoint = new Phaser.Point(posX, this.game.height);
+                }
+                else if (side == 3) // left
+                {
+                    var posY = this.game.height * factor;
+
+                    bullet.reset(0, posY);
+
+                    bulletPoint = new Phaser.Point(0, posY);
+                }
+                else if (side == 4) // left
+                {
+                    var posY = this.game.height * factor;
+
+                    bullet.reset(this.game.width, posY);
+
+                    bulletPoint = new Phaser.Point(this.game.width, posY);
+                }
+
+                var angle = this.game.math.radToDeg(Phaser.Point.angle(centerPoint, bulletPoint));
+                angle = angle;
+                bullet.angle = angle + 90;
+                console.log(angle);
+                this.game.physics.arcade.velocityFromAngle(
+                    bullet.angle - 90, bulletSpeed, bullet.body.velocity);
+
+                //this.game.time.events.add(1000, this.launchEnemy);
+                console.log("launched an enemy")
             }
-            else
-            {
-                if (ranBullet == 1)
-                    bulletType = 1;
-                else
-                    bulletType = 2;
-            }
-        }
-
-        //var bulletType = this.game.rnd.integerInRange(1, 4);
-        var bullet;
-        var bulletSpeed;
-        if (bulletType == 1) {
-            bullet = this.frogs.getFirstExists(false);
-            bulletSpeed = this.FROG_SPEED;
-        }
-        else if (bulletType == 2) {
-            bullet = this.pinwheels.getFirstExists(false);
-            bulletSpeed = this.PINWHEEL_SPEED;
-        }
-        else if (bulletType == 3) {
-            bullet = this.cranes.getFirstExists(false);
-            bulletSpeed = this.CRANE_SPEED;
-        }
-        else if (bulletType == 4) {
-            bullet = this.butterfly.getFirstExists(false);
-            bulletSpeed = this.BUTTERFLY_SPEED;
-        }
-
-        if (bullet)
-        {
-            var factor = this.game.rnd.frac();
-
-            var centerPoint = new Phaser.Point(this.player.x, this.player.y);
-            var bulletPoint = new Phaser.Point(0, 0);
-
-            var side = this.game.rnd.integerInRange(1, 1);
-            if (side == 1) // top
-            {
-                var posX = this.game.width * factor;
-
-                bullet.reset(posX, 0);
-
-                bulletPoint = new Phaser.Point(posX, 0);
-            }
-            else if (side == 2) // bottom
-            {
-                var posX = this.game.width * factor;
-
-                bullet.reset(posX, this.game.height);
-
-                bulletPoint = new Phaser.Point(posX, this.game.height);
-            }
-            else if (side == 3) // left
-            {
-                var posY = this.game.height * factor;
-
-                bullet.reset(0, posY);
-
-                bulletPoint = new Phaser.Point(0, posY);
-            }
-            else if (side == 4) // left
-            {
-                var posY = this.game.height * factor;
-
-                bullet.reset(this.game.width, posY);
-
-                bulletPoint = new Phaser.Point(this.game.width, posY);
-            }
-
-            var angle = this.game.math.radToDeg(Phaser.Point.angle(centerPoint, bulletPoint));
-            angle = angle;
-            bullet.angle = angle + 90;
-            console.log(angle);
-            this.game.physics.arcade.velocityFromAngle(
-                bullet.angle - 90, bulletSpeed, bullet.body.velocity);
-
-            //this.game.time.events.add(1000, this.launchEnemy);
-            console.log("launched an enemy")
         }
     },
 
