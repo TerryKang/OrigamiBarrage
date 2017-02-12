@@ -61,6 +61,9 @@ BasicGame.Game = function (game) {
     this.BUTTERFLY_SPEED = 300;
     this.PINWHEEL_SPEED = 400;
     this.CRANE_SPEED = 600;
+    this.shields;
+    this.score = 0;
+    this.scoreText;
 };
 
 BasicGame.Game.prototype = {
@@ -106,6 +109,7 @@ BasicGame.Game.prototype = {
         this.player.body.maxVelocity.setTo(this.MAXSPEED, this.MAXSPEED);
         this.player.body.drag.setTo(this.DRAG, this.DRAG);
         this.player.scale.setTo(this.PLAYER_SCALE, this.PLAYER_SCALE);
+        this.player.health = 100;
 
         // player's bullets.
         this.bullets = this.game.add.group();
@@ -154,6 +158,10 @@ BasicGame.Game.prototype = {
         this.frogs.setAll('anchor.y', 0.5);
         this.frogs.setAll('outOfBoundsKill', true);
         this.frogs.setAll('checkWorldBounds', true);
+        this.frogs.setAll('damageAmount', 20);
+        this.frogs.forEach( function(element) {
+            element.damageAmount = 20;
+        });
 
         this.pinwheels = this.game.add.group();
         this.pinwheels.enableBody = true;
@@ -163,6 +171,9 @@ BasicGame.Game.prototype = {
         this.pinwheels.setAll('anchor.y', 0.5);
         this.pinwheels.setAll('outOfBoundsKill', true);
         this.pinwheels.setAll('checkWorldBounds', true);
+        this.pinwheels.forEach( function(element) {
+            element.damageAmount = 20;
+        });
 
         this.cranes = this.game.add.group();
         this.cranes.enableBody = true;
@@ -172,6 +183,9 @@ BasicGame.Game.prototype = {
         this.cranes.setAll('anchor.y', 0.5);
         this.cranes.setAll('outOfBoundsKill', true);
         this.cranes.setAll('checkWorldBounds', true);
+        this.cranes.forEach( function(element) {
+            element.damageAmount = 20;
+        });
 
         this.butterfly = this.game.add.group();
         this.butterfly.enableBody = true;
@@ -181,6 +195,10 @@ BasicGame.Game.prototype = {
         this.butterfly.setAll('anchor.y', 0.5);
         this.butterfly.setAll('outOfBoundsKill', true);
         this.butterfly.setAll('checkWorldBounds', true);
+        this.butterfly.setAll('damageAmount', 20);
+        this.butterfly.forEach( function(element) {
+            element.damageAmount = 20;
+        });
 
         this.bulletTimer = this.game.time.create(false);
         this.bulletTimer.loop(1000, this.launchEnemy, this);
@@ -204,7 +222,15 @@ BasicGame.Game.prototype = {
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        this.playerTrail = game.add.emitter(this.player.x, this.player.y + 10, 400);
+        //  Shields stat
+        this.shields = this.game.add.text(game.world.width - 150, 10,
+         'HP: ' + this.player.health +'%', { font: '20px Arial', fill: '#fff' });
+
+        //  Score
+        this.scoreText = this.game.add.text(10, 10,
+         'Score: ' + this.score, { font: '20px Arial', fill: '#fff' });
+
+        /*this.playerTrail = game.add.emitter(this.player.x, this.player.y + 10, 400);
         this.playerTrail.width = 50;
         this.playerTrail.makeParticles('bullet');
         this.playerTrail.setXSpeed(30, -30);
@@ -212,12 +238,23 @@ BasicGame.Game.prototype = {
         this.playerTrail.setRotation(50,-50);
         this.playerTrail.setAlpha(1, 0.01, 800);
         this.playerTrail.setScale(0.05, 0.4, 0.05, 0.4, 2000, Phaser.Easing.Quintic.Out);
-        this.playerTrail.start(false, 5000, 10);
+        this.playerTrail.start(false, 5000, 10);*/
 
         //this.launchEnemy();
 	},
 
+    displayHP: function () {
+        this.shields.setText("HP: " + this.player.health + "%");
+    },
+
+    displayScore: function () {
+        this.scoreText.setText("Score: " + this.score);
+    },
+
     fireBullet: function () {
+        if (!this.player.alive)
+            return;
+
         var bullet = this.bullets.getFirstExists(false);
 
         if (bullet)
@@ -382,11 +419,11 @@ BasicGame.Game.prototype = {
         }
 
         // Note: The below code is prolly not neccessary.
-        this.bank = this.player.body.velocity.x / this.MAXSPEED;
+        /*this.bank = this.player.body.velocity.x / this.MAXSPEED;
         this.player.scale.x = 1 - Math.abs(this.bank) * 0.5;
         this.player.scale.x *= this.PLAYER_SCALE;
         this.player.angle = this.bank * 5;
-        this.playerTrail.x = this.player.x;
+        this.playerTrail.x = this.player.x;*/
 
         this.game.physics.arcade.overlap(this.player, this.frogs, this.shipCollide, null, this);
         this.game.physics.arcade.overlap(this.player, this.pinwheels, this.shipCollide, null, this);
@@ -450,7 +487,10 @@ BasicGame.Game.prototype = {
         explosion.alpha = 0.7;
         explosion.play('explosion', 30, false, true);
         enemy.kill();
-        bullet.kill()
+        bullet.kill();
+
+        this.score += enemy.damageAmount * 10;
+        this.displayScore();
     },
 
     shipCollide: function (player, enemy) {
@@ -467,6 +507,9 @@ BasicGame.Game.prototype = {
         crash.play('crash', 30, false, true);
 
         enemy.kill();
+
+        player.damage(enemy.damageAmount);
+        this.displayHP();
     },
 
 	quitGame: function (pointer) {
