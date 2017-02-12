@@ -37,7 +37,12 @@ BasicGame.Preloader.prototype = {
     	this.load.spritesheet('dude', 'assets/images/dude.png', 32, 48);
 
     	// luxes.
-    	this.load.image('bullet', 'assets/images/bullet.png');
+    	this.load.image('flight', 'assets/images/flight_nomal_resize.png');
+    	this.load.image('frog', 'assets/images/flog_green_resize.png');
+    	this.load.image('rabbit', 'assets/images/rabbit_resize.png');
+    	this.load.image('crane', 'assets/images/Crane_resize.png');
+
+    	this.load.image('bg1', 'assets/images/bg1.jpeg');
 
 
 		// Audio track Attribution (menu sci-fi 1.ogg, CC 3.0)
