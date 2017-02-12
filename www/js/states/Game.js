@@ -40,6 +40,8 @@ BasicGame.Game = function (game) {
     this.startY;
     this.endX;
     this.endY;
+    this.zoomInKey;
+    this.zoomOutKey;
 };
 
 BasicGame.Game.prototype = {
@@ -142,6 +144,9 @@ BasicGame.Game.prototype = {
 
         this.layers[this.floor-1].add(this.player);
         this.layers.sort('z', Phaser.Group.SORT_ASCENDING);
+
+        zoomInKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+        zoomOutKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
 	},
 
     bulletTimerUpdate: function () {
@@ -252,6 +257,13 @@ BasicGame.Game.prototype = {
 
         // luxes.
         //starfield.tilePosition.y += 2;
+        if (zoomInKey.isDown || game.input.activePointer.isDown) {
+            //this.zoomIn();
+        }
+
+        if (zoomOutKey.isDown || game.input.activePointer.isDown) {
+            //this.zoomOut();
+        }
 	},
 
 	quitGame: function (pointer) {
@@ -280,6 +292,14 @@ BasicGame.Game.prototype = {
             if(this.floor == 3)
                 this.worldScale = 1;
             else this.worldScale = 2;
+
+            for (var i = 0; i < 3; i++)
+            {
+                if (i != this.floor - 1)
+                    this.layers[i].setAll('alpha', 0.5);
+                else
+                    this.layers[i].setAll('alpha', 1);
+            }
         }
         this.scaleMap(this.worldScale);
         
@@ -301,6 +321,14 @@ BasicGame.Game.prototype = {
             this.layers[this.floor-1].add(this.player);
             this.changeMap();
             this.worldScale = 1;
+
+            for (var i = 0; i < 3; i++)
+            {
+                if (i != this.floor - 1)
+                    this.layers[i].setAll('alpha', 0.5);
+                else
+                    this.layers[i].setAll('alpha', 1);
+            }
         }
 
         // set our world scale as needed
